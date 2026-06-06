@@ -33,6 +33,8 @@ import GuardianDashboard from "./pages/GuardianDashboard";
 import StudentFingerspell from "./pages/student/Fingerspell";
 import ZSLLab from "./pages/ZSLLab";
 import DialectBridge from "./pages/DialectBridge";
+import DialectRouter from "./pages/DialectRouter";
+import DialectValidator from "./pages/DialectValidator";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +75,8 @@ const App = () => (
           <Route path="/guardian" element={<GuardianDashboard />} />
           <Route path="/zsl-lab" element={<ZSLLab />} />
           <Route path="/dialect-bridge" element={<DialectBridge />} />
+          <Route path="/dialect-bridge/router" element={<DialectRouter />} />
+          <Route path="/dialect-bridge/validator" element={<DialectValidator />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
