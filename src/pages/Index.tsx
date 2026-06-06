@@ -67,8 +67,7 @@ const Index = () => {
             The Classroom That Adapts to You
           </p>
           <p className="text-base text-muted-foreground max-w-2xl mx-auto animate-in fade-in duration-1000 delay-300">
-            Real-time speech-to-text for inclusive education. Teachers broadcast,
-            students receive instantly.
+            Teach from your phone. Students follow as live text or sign language, online, offline, and during load-shedding.
           </p>
         </div>
 
