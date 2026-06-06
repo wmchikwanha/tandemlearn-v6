@@ -297,10 +297,10 @@ export const WIPStatusPanel = () => {
             We do not over-promise avatar generation. Phases 3–4 require a deaf-led linguistic
             R&amp;D partner and a published ZSL dataset. Funding inquiries:{" "}
             <a
-              href="mailto:hello@tandemlearn.app?subject=ZSL%20Avatar%20R%26D"
+              href="mailto:learning@tandemlearn.site?subject=ZSL%20Avatar%20R%26D"
               className="text-primary font-semibold hover:underline"
             >
-              hello@tandemlearn.app
+              learning@tandemlearn.site
             </a>
             .
           </p>

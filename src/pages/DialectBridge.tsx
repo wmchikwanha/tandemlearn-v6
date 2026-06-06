@@ -132,7 +132,7 @@ export default function DialectBridge() {
               <Link to="/dialect-bridge/admin"><ShieldCheck className="h-4 w-4 mr-2" /> Admin · Panel seats</Link>
             </Button>
             <Button asChild size="lg" variant="ghost">
-              <a href="mailto:hello@tandemlearn.app?subject=Dialect%20Bridge%20partnership">
+              <a href="mailto:learning@tandemlearn.site?subject=Dialect%20Bridge%20partnership">
                 <Mail className="h-4 w-4 mr-2" /> Partner with us
               </a>
             </Button>
@@ -273,7 +273,7 @@ export default function DialectBridge() {
               <p className="text-xs text-muted-foreground italic">
                 Overall Dialect Bridge readiness. We do not over-promise: Phases 2–3 require
                 schema, edge functions, validated regional clips, and signed MoUs with partner
-                Schools for the Deaf. <a href="mailto:hello@tandemlearn.app?subject=Dialect%20Bridge%20R%26D" className="text-primary font-semibold hover:underline">Talk to us</a>.
+                Schools for the Deaf. <a href="mailto:learning@tandemlearn.site?subject=Dialect%20Bridge%20R%26D" className="text-primary font-semibold hover:underline">Talk to us</a>.
               </p>
             </div>
           </CardContent>

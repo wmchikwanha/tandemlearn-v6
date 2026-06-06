@@ -37,7 +37,7 @@ export default function ZSLLab() {
               <Link to="/dialect-bridge"><ArrowLeftRight className="h-4 w-4 mr-2" /> Dialect Bridge (WIP)</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <a href="mailto:hello@tandemlearn.app?subject=Contribute%20a%20sign&body=I%27d%20like%20to%20contribute%20signs%2Fclips%20to%20the%20ZSL%20Lab.">
+              <a href="mailto:learning@tandemlearn.site?subject=Contribute%20a%20sign&body=I%27d%20like%20to%20contribute%20signs%2Fclips%20to%20the%20ZSL%20Lab.">
                 <Mail className="h-4 w-4 mr-2" /> Contribute a sign
               </a>
             </Button>
