@@ -123,10 +123,13 @@ export default function DialectBridge() {
           </p>
           <div className="flex flex-wrap gap-3 justify-center pt-2">
             <Button asChild size="lg">
-              <a href="#preview">See the preview <ArrowRight className="h-4 w-4 ml-2" /></a>
+              <Link to="/dialect-bridge/router">Open live router <ArrowRight className="h-4 w-4 ml-2" /></Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <a href="mailto:hello@tandemlearn.app?subject=Dialect%20Bridge%20partnership&body=I%27d%20like%20to%20discuss%20joining%20a%20regional%20validator%20panel%20or%20funding%20Dialect%20Bridge.">
+              <Link to="/dialect-bridge/validator"><ShieldCheck className="h-4 w-4 mr-2" /> Validator console</Link>
+            </Button>
+            <Button asChild size="lg" variant="ghost">
+              <a href="mailto:hello@tandemlearn.app?subject=Dialect%20Bridge%20partnership">
                 <Mail className="h-4 w-4 mr-2" /> Partner with us
               </a>
             </Button>
