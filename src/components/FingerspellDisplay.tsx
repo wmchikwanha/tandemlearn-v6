@@ -215,7 +215,7 @@ function LetterCard({ sign, compact, active }: { sign: LetterSign; compact?: boo
   }
 
   return (
-    <div className={`${size} ${activeRing} rounded-xl border-2 border-border bg-card flex flex-col items-center justify-center p-2 transition-all hover:scale-105`}>
+    <div className={`${size} ${activeRing} rounded-xl border-2 border-border bg-card flex flex-col items-center justify-center p-2 transition-all duration-200 hover:scale-125 hover:z-10 hover:shadow-2xl cursor-pointer`}>
       {imgError ? (
         <Hand className={`text-muted-foreground ${compact ? "h-8 w-8" : "h-14 w-14 sm:h-16 sm:w-16"}`} />
       ) : (
