@@ -255,15 +255,18 @@ export default function DialectValidator() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-6 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-6 flex items-center justify-between gap-3 flex-wrap">
           <Link to="/dialect-bridge" className="text-sm text-muted-foreground hover:text-primary">← Dialect Bridge</Link>
-          <Link to="/dialect-bridge/router" className="text-sm text-primary hover:underline">Live router →</Link>
+          <div className="flex items-center gap-3">
+            <ValidatorNotificationPrefs regions={regions} />
+            <Link to="/dialect-bridge/router" className="text-sm text-primary hover:underline">Live router →</Link>
+          </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-10 max-w-5xl space-y-6">
         <div className="space-y-2">
-          <Badge className="gap-1"><ShieldCheck className="h-3.5 w-3.5" /> Validator console</Badge>
+          <Badge className="gap-1"><Inbox className="h-3.5 w-3.5" /> Variant inbox</Badge>
           <h1 className="text-3xl font-extrabold">Approve · flag · edit dialect variants</h1>
           <p className="text-muted-foreground">
             Every action is logged with reviewer, timestamp and note. Edits create a new version — nothing
@@ -271,33 +274,61 @@ export default function DialectValidator() {
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3 items-end">
+        <div className="grid gap-3 md:grid-cols-[1fr_auto_auto] md:items-end">
           <div className="space-y-1.5">
-            <Label>Your region{isAdmin ? " (admin view)" : ""}</Label>
+            <Label>Search</Label>
+            <div className="relative">
+              <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Label, description, notation, region…"
+                className="pl-9"
+              />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Dialect{isAdmin ? " (admin view)" : ""}</Label>
             <Select value={activeRegion} onValueChange={setActiveRegion}>
-              <SelectTrigger className="w-[240px]"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-[220px]"><SelectValue /></SelectTrigger>
               <SelectContent>
+                <SelectItem value="__all__">All my regions</SelectItem>
                 {regions.map((r) => <SelectItem key={r} value={r}>{r.replace(/_/g, " ")}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
-          <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-            <TabsList>
-              <TabsTrigger value="pending">Pending</TabsTrigger>
-              <TabsTrigger value="flagged">Flagged</TabsTrigger>
-              <TabsTrigger value="approved">Approved</TabsTrigger>
-              <TabsTrigger value="all">All</TabsTrigger>
-            </TabsList>
-            {["pending","flagged","approved","all"].map((s) => <TabsContent key={s} value={s} />)}
-          </Tabs>
+          <div className="space-y-1.5">
+            <Label>Universal sign</Label>
+            <Select value={universalFilter} onValueChange={setUniversalFilter}>
+              <SelectTrigger className="w-[220px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">All concepts</SelectItem>
+                {universalSigns.map((u) => <SelectItem key={u.id} value={u.id}>{u.gloss}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        {variants.length === 0 && (
-          <Card><CardContent className="p-8 text-center text-muted-foreground">No variants here yet.</CardContent></Card>
+        <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+          <TabsList>
+            <TabsTrigger value="pending">Pending</TabsTrigger>
+            <TabsTrigger value="flagged">Flagged</TabsTrigger>
+            <TabsTrigger value="approved">Approved</TabsTrigger>
+            <TabsTrigger value="all">All</TabsTrigger>
+          </TabsList>
+          {["pending","flagged","approved","all"].map((s) => <TabsContent key={s} value={s} />)}
+        </Tabs>
+
+        <div className="text-xs text-muted-foreground">
+          {filteredVariants.length} of {variants.length} variant{variants.length === 1 ? "" : "s"} shown
+        </div>
+
+        {filteredVariants.length === 0 && (
+          <Card><CardContent className="p-8 text-center text-muted-foreground">No variants match these filters.</CardContent></Card>
         )}
 
         <div className="space-y-3">
-          {variants.map((v) => (
+          {filteredVariants.map((v) => (
             <Card key={v.id} className="overflow-hidden">
               <CardHeader className="cursor-pointer" onClick={() => openVariant(v)}>
                 <div className="flex items-center justify-between flex-wrap gap-2">
