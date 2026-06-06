@@ -70,6 +70,7 @@ export const ClassroomVideoGrid = ({ lessonId, active }: ClassroomVideoGridProps
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) throw new Error("Not authenticated");
+      setCurrentUserId(sessionData.session.user.id);
 
       const response = await supabase.functions.invoke("livekit-token", {
         body: { lessonId, role: "subscriber" },
