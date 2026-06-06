@@ -51,8 +51,11 @@ export default function DialectValidator() {
   const [userId, setUserId] = useState<string | null>(null);
   const [regions, setRegions] = useState<string[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [activeRegion, setActiveRegion] = useState<string>("");
+  const [activeRegion, setActiveRegion] = useState<string>("__all__");
   const [variants, setVariants] = useState<Variant[]>([]);
+  const [universalSigns, setUniversalSigns] = useState<{ id: string; gloss: string }[]>([]);
+  const [universalFilter, setUniversalFilter] = useState<string>("__all__");
+  const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [versions, setVersions] = useState<VersionRow[]>([]);
@@ -62,6 +65,14 @@ export default function DialectValidator() {
   const [editDesc, setEditDesc] = useState("");
   const [editNotation, setEditNotation] = useState("");
   const [reviewNote, setReviewNote] = useState("");
+  const [prefs, setPrefs] = useState<ValidatorNotifPrefs>(DEFAULT_PREFS);
+
+  useEffect(() => {
+    setPrefs(loadPrefs());
+    const onChange = () => setPrefs(loadPrefs());
+    window.addEventListener("validator-prefs-changed", onChange);
+    return () => window.removeEventListener("validator-prefs-changed", onChange);
+  }, []);
 
   useEffect(() => {
     (async () => {
