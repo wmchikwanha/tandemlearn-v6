@@ -87,7 +87,7 @@ export default function Fingerspell() {
                 <CardTitle className="text-base">Quick Reference — Full Alphabet</CardTitle>
               </CardHeader>
               <CardContent>
-                <FingerspellDisplay word="abcdefghijklmnopqrstuvwxyz" hideInput compact />
+                <FingerspellDisplay word="abcdefghijklmnopqrstuvwxyz" hideInput hideTools />
               </CardContent>
             </Card>
           </TabsContent>
