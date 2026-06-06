@@ -208,7 +208,7 @@ function LetterCard({ sign, compact, active }: { sign: LetterSign; compact?: boo
 
   if (!sign.exists) {
     return (
-      <div className={`${size} ${activeRing} rounded-xl border-2 border-border bg-muted/30 flex flex-col items-center justify-center transition-all`}>
+      <div className={`${size} ${activeRing} rounded-xl border-2 border-border bg-muted/30 flex flex-col items-center justify-center transition-all duration-200 hover:scale-125 hover:z-10 hover:shadow-2xl cursor-pointer`}>
         <span className={`font-bold text-muted-foreground ${compact ? "text-sm" : "text-2xl sm:text-3xl"}`}>{sign.letter}</span>
       </div>
     );
