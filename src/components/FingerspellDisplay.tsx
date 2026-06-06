@@ -199,8 +199,8 @@ export const FingerspellDisplay = ({
 
 function LetterCard({ sign, compact, active }: { sign: LetterSign; compact?: boolean; active?: boolean }) {
   const [imgError, setImgError] = useState(false);
-  const size = compact ? "w-14 h-16 sm:w-16 sm:h-20" : "w-32 h-40 sm:w-40 sm:h-52";
-  const activeRing = active ? "ring-4 ring-primary scale-105 shadow-lg" : "";
+  const size = compact ? "w-14 h-16 sm:w-16 sm:h-20" : "w-24 h-32 sm:w-28 sm:h-36";
+  const activeRing = active ? "ring-4 ring-primary scale-110 shadow-xl z-10" : "";
 
   if (sign.letter === " ") {
     return <div className={compact ? "w-4" : "w-6"} />;
