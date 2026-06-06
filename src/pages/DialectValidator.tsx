@@ -8,11 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShieldCheck, Check, Flag, X, History, Pencil, Save } from "lucide-react";
+import { ShieldCheck, Check, Flag, X, History, Pencil, Save, Search, Inbox } from "lucide-react";
 import { toast } from "sonner";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { ZIM_REGION_LIST } from "@/lib/dialectRouter";
+import ValidatorNotificationPrefs, { loadPrefs, type ValidatorNotifPrefs, DEFAULT_PREFS } from "@/components/dialect/ValidatorNotificationPrefs";
 
 type Variant = {
   id: string;
@@ -50,8 +51,11 @@ export default function DialectValidator() {
   const [userId, setUserId] = useState<string | null>(null);
   const [regions, setRegions] = useState<string[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [activeRegion, setActiveRegion] = useState<string>("");
+  const [activeRegion, setActiveRegion] = useState<string>("__all__");
   const [variants, setVariants] = useState<Variant[]>([]);
+  const [universalSigns, setUniversalSigns] = useState<{ id: string; gloss: string }[]>([]);
+  const [universalFilter, setUniversalFilter] = useState<string>("__all__");
+  const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [versions, setVersions] = useState<VersionRow[]>([]);
@@ -61,6 +65,14 @@ export default function DialectValidator() {
   const [editDesc, setEditDesc] = useState("");
   const [editNotation, setEditNotation] = useState("");
   const [reviewNote, setReviewNote] = useState("");
+  const [prefs, setPrefs] = useState<ValidatorNotifPrefs>(DEFAULT_PREFS);
+
+  useEffect(() => {
+    setPrefs(loadPrefs());
+    const onChange = () => setPrefs(loadPrefs());
+    window.addEventListener("validator-prefs-changed", onChange);
+    return () => window.removeEventListener("validator-prefs-changed", onChange);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -75,54 +87,77 @@ export default function DialectValidator() {
       setIsAdmin(admin);
       const myRegions = admin ? [...ZIM_REGION_LIST] : (panel ?? []).map((p) => p.region);
       setRegions(myRegions);
-      if (myRegions.length) setActiveRegion(myRegions[0]);
+      // keep default "__all__" so the inbox spans every region the validator covers
+      const { data: us } = await supabase.from("universal_signs").select("id, gloss").order("gloss");
+      setUniversalSigns((us ?? []) as { id: string; gloss: string }[]);
     })();
   }, []);
 
   const loadVariants = useCallback(async () => {
-    if (!activeRegion) return;
-    const q = supabase
+    if (regions.length === 0) return;
+    const regionList = activeRegion === "__all__" ? regions : [activeRegion];
+    let q = supabase
       .from("dialect_variants")
       .select("*")
-      .eq("region", activeRegion)
+      .in("region", regionList)
       .order("updated_at", { ascending: false });
-    const { data } = statusFilter === "all" ? await q : await q.eq("status", statusFilter);
+    if (statusFilter !== "all") q = q.eq("status", statusFilter);
+    if (universalFilter !== "__all__") q = q.eq("universal_sign_id", universalFilter);
+    const { data } = await q;
     setVariants((data ?? []) as Variant[]);
-  }, [activeRegion, statusFilter]);
+  }, [activeRegion, statusFilter, universalFilter, regions]);
 
   useEffect(() => { loadVariants(); }, [loadVariants]);
 
-  // Realtime alerts: notify validator when a variant in their region becomes pending or flagged
+  const filteredVariants = variants.filter((v) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      v.variant_label.toLowerCase().includes(q) ||
+      (v.description ?? "").toLowerCase().includes(q) ||
+      (v.notation ?? "").toLowerCase().includes(q) ||
+      v.region.toLowerCase().includes(q)
+    );
+  });
+
+  // Realtime alerts: respect notification prefs (channels, alert types, region scopes)
   useEffect(() => {
     if (regions.length === 0) return;
     const regionSet = new Set(regions);
+    const allowedRegion = (r: string) => regionSet.has(r) && (prefs.regionScopes[r] ?? true);
+    const inRegionForReload = (r: string) =>
+      activeRegion === "__all__" ? regionSet.has(r) : r === activeRegion;
     const channel = supabase
       .channel("dialect-variant-alerts")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "dialect_variants" }, (payload) => {
         const row: any = payload.new;
-        if (!regionSet.has(row.region)) return;
+        if (!allowedRegion(row.region)) return;
         if (row.status !== "pending") return;
-        toast.message(`New variant pending review · ${row.region.replace(/_/g, " ")}`, {
-          description: row.variant_label,
-          action: { label: "Open", onClick: () => { setActiveRegion(row.region); setStatusFilter("pending"); } },
-        });
-        if (row.region === activeRegion) loadVariants();
+        if (prefs.inApp && prefs.notifyPending) {
+          toast.message(`New variant pending review · ${row.region.replace(/_/g, " ")}`, {
+            description: row.variant_label,
+            action: { label: "Open", onClick: () => { setActiveRegion(row.region); setStatusFilter("pending"); } },
+          });
+        }
+        if (inRegionForReload(row.region)) loadVariants();
       })
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "dialect_variants" }, (payload) => {
         const row: any = payload.new;
         const old: any = payload.old;
-        if (!regionSet.has(row.region)) return;
+        if (!allowedRegion(row.region)) return;
         if (row.status === "flagged" && old?.status !== "flagged") {
-          toast.warning(`Variant flagged · ${row.region.replace(/_/g, " ")}`, {
-            description: row.variant_label,
-            action: { label: "Open", onClick: () => { setActiveRegion(row.region); setStatusFilter("flagged"); } },
-          });
-          if (row.region === activeRegion) loadVariants();
+          if (prefs.inApp && prefs.notifyFlagged) {
+            toast.warning(`Variant flagged · ${row.region.replace(/_/g, " ")}`, {
+              description: row.variant_label,
+              action: { label: "Open", onClick: () => { setActiveRegion(row.region); setStatusFilter("flagged"); } },
+            });
+          }
+          if (inRegionForReload(row.region)) loadVariants();
         }
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [regions, activeRegion, loadVariants]);
+  }, [regions, activeRegion, loadVariants, prefs]);
 
   const openVariant = async (v: Variant) => {
     if (expanded === v.id) { setExpanded(null); return; }
@@ -220,15 +255,18 @@ export default function DialectValidator() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-6 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-6 flex items-center justify-between gap-3 flex-wrap">
           <Link to="/dialect-bridge" className="text-sm text-muted-foreground hover:text-primary">← Dialect Bridge</Link>
-          <Link to="/dialect-bridge/router" className="text-sm text-primary hover:underline">Live router →</Link>
+          <div className="flex items-center gap-3">
+            <ValidatorNotificationPrefs regions={regions} />
+            <Link to="/dialect-bridge/router" className="text-sm text-primary hover:underline">Live router →</Link>
+          </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-10 max-w-5xl space-y-6">
         <div className="space-y-2">
-          <Badge className="gap-1"><ShieldCheck className="h-3.5 w-3.5" /> Validator console</Badge>
+          <Badge className="gap-1"><Inbox className="h-3.5 w-3.5" /> Variant inbox</Badge>
           <h1 className="text-3xl font-extrabold">Approve · flag · edit dialect variants</h1>
           <p className="text-muted-foreground">
             Every action is logged with reviewer, timestamp and note. Edits create a new version — nothing
@@ -236,38 +274,67 @@ export default function DialectValidator() {
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3 items-end">
+        <div className="grid gap-3 md:grid-cols-[1fr_auto_auto] md:items-end">
           <div className="space-y-1.5">
-            <Label>Your region{isAdmin ? " (admin view)" : ""}</Label>
+            <Label>Search</Label>
+            <div className="relative">
+              <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Label, description, notation, region…"
+                className="pl-9"
+              />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Dialect{isAdmin ? " (admin view)" : ""}</Label>
             <Select value={activeRegion} onValueChange={setActiveRegion}>
-              <SelectTrigger className="w-[240px]"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-[220px]"><SelectValue /></SelectTrigger>
               <SelectContent>
+                <SelectItem value="__all__">All my regions</SelectItem>
                 {regions.map((r) => <SelectItem key={r} value={r}>{r.replace(/_/g, " ")}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
-          <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-            <TabsList>
-              <TabsTrigger value="pending">Pending</TabsTrigger>
-              <TabsTrigger value="flagged">Flagged</TabsTrigger>
-              <TabsTrigger value="approved">Approved</TabsTrigger>
-              <TabsTrigger value="all">All</TabsTrigger>
-            </TabsList>
-            {["pending","flagged","approved","all"].map((s) => <TabsContent key={s} value={s} />)}
-          </Tabs>
+          <div className="space-y-1.5">
+            <Label>Universal sign</Label>
+            <Select value={universalFilter} onValueChange={setUniversalFilter}>
+              <SelectTrigger className="w-[220px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">All concepts</SelectItem>
+                {universalSigns.map((u) => <SelectItem key={u.id} value={u.id}>{u.gloss}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        {variants.length === 0 && (
-          <Card><CardContent className="p-8 text-center text-muted-foreground">No variants here yet.</CardContent></Card>
+        <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+          <TabsList>
+            <TabsTrigger value="pending">Pending</TabsTrigger>
+            <TabsTrigger value="flagged">Flagged</TabsTrigger>
+            <TabsTrigger value="approved">Approved</TabsTrigger>
+            <TabsTrigger value="all">All</TabsTrigger>
+          </TabsList>
+          {["pending","flagged","approved","all"].map((s) => <TabsContent key={s} value={s} />)}
+        </Tabs>
+
+        <div className="text-xs text-muted-foreground">
+          {filteredVariants.length} of {variants.length} variant{variants.length === 1 ? "" : "s"} shown
+        </div>
+
+        {filteredVariants.length === 0 && (
+          <Card><CardContent className="p-8 text-center text-muted-foreground">No variants match these filters.</CardContent></Card>
         )}
 
         <div className="space-y-3">
-          {variants.map((v) => (
+          {filteredVariants.map((v) => (
             <Card key={v.id} className="overflow-hidden">
               <CardHeader className="cursor-pointer" onClick={() => openVariant(v)}>
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <CardTitle className="text-base">{v.variant_label}</CardTitle>
                   <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="text-xs capitalize">{v.region.replace(/_/g, " ")}</Badge>
                     <Badge variant="outline" className="text-xs">v{v.current_version}</Badge>
                     <Badge variant="outline" className={`text-xs ${STATUS_TONE[v.status] ?? ""}`}>{v.status}</Badge>
                     <Badge variant="outline" className="text-xs">{Math.round(v.confidence * 100)}%</Badge>
