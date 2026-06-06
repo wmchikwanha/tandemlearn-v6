@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Hand, BookOpen, Globe2, School, ArrowRight, ExternalLink, Mail } from "lucide-react";
+import { Hand, BookOpen, Globe2, School, ArrowRight, ExternalLink, Mail, ArrowLeftRight } from "lucide-react";
 import Footer from "@/components/Footer";
 import { ZSL_PHRASES } from "@/utils/zslPhrases";
 import { WIPStatusPanel } from "@/components/WIPStatusPanel";
@@ -33,6 +33,9 @@ export default function ZSLLab() {
           </p>
           <div className="flex flex-wrap gap-3 justify-center pt-2">
             <Button asChild size="lg"><Link to="/student/fingerspell">Try the practice tool <ArrowRight className="h-4 w-4 ml-2" /></Link></Button>
+            <Button asChild size="lg" variant="secondary">
+              <Link to="/dialect-bridge"><ArrowLeftRight className="h-4 w-4 mr-2" /> Dialect Bridge (WIP)</Link>
+            </Button>
             <Button asChild size="lg" variant="outline">
               <a href="mailto:hello@tandemlearn.app?subject=Contribute%20a%20sign&body=I%27d%20like%20to%20contribute%20signs%2Fclips%20to%20the%20ZSL%20Lab.">
                 <Mail className="h-4 w-4 mr-2" /> Contribute a sign

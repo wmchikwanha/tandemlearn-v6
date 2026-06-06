@@ -13,6 +13,7 @@ import {
   Languages,
   Sparkles,
   ExternalLink,
+  ArrowLeftRight,
 } from "lucide-react";
 import { ZSL_PHRASES } from "@/utils/zslPhrases";
 
@@ -85,6 +86,14 @@ const CAPABILITIES: Capability[] = [
     detail: "Publish curated clips + captions under a permissive licence with the deaf community as co-stewards.",
     progress: 10,
     icon: <ExternalLink className="h-4 w-4" />,
+  },
+  {
+    title: "ZSL Dialect Bridge",
+    status: "wip",
+    detail: "Adaptive variant translator across Harare, Masvingo, Bulawayo and rural ZSL — with deaf-led regional validator panels.",
+    progress: 28,
+    evidence: { label: "Preview", href: "/dialect-bridge" },
+    icon: <ArrowLeftRight className="h-4 w-4" />,
   },
   {
     title: "Live speech → ZSL avatar",
