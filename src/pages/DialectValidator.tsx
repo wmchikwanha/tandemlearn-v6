@@ -87,22 +87,38 @@ export default function DialectValidator() {
       setIsAdmin(admin);
       const myRegions = admin ? [...ZIM_REGION_LIST] : (panel ?? []).map((p) => p.region);
       setRegions(myRegions);
-      if (myRegions.length) setActiveRegion(myRegions[0]);
+      // keep default "__all__" so the inbox spans every region the validator covers
+      const { data: us } = await supabase.from("universal_signs").select("id, gloss").order("gloss");
+      setUniversalSigns((us ?? []) as { id: string; gloss: string }[]);
     })();
   }, []);
 
   const loadVariants = useCallback(async () => {
-    if (!activeRegion) return;
-    const q = supabase
+    if (regions.length === 0) return;
+    const regionList = activeRegion === "__all__" ? regions : [activeRegion];
+    let q = supabase
       .from("dialect_variants")
       .select("*")
-      .eq("region", activeRegion)
+      .in("region", regionList)
       .order("updated_at", { ascending: false });
-    const { data } = statusFilter === "all" ? await q : await q.eq("status", statusFilter);
+    if (statusFilter !== "all") q = q.eq("status", statusFilter);
+    if (universalFilter !== "__all__") q = q.eq("universal_sign_id", universalFilter);
+    const { data } = await q;
     setVariants((data ?? []) as Variant[]);
-  }, [activeRegion, statusFilter]);
+  }, [activeRegion, statusFilter, universalFilter, regions]);
 
   useEffect(() => { loadVariants(); }, [loadVariants]);
+
+  const filteredVariants = variants.filter((v) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      v.variant_label.toLowerCase().includes(q) ||
+      (v.description ?? "").toLowerCase().includes(q) ||
+      (v.notation ?? "").toLowerCase().includes(q) ||
+      v.region.toLowerCase().includes(q)
+    );
+  });
 
   // Realtime alerts: notify validator when a variant in their region becomes pending or flagged
   useEffect(() => {
