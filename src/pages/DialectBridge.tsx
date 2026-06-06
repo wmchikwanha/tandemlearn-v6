@@ -128,6 +128,9 @@ export default function DialectBridge() {
             <Button asChild size="lg" variant="outline">
               <Link to="/dialect-bridge/validator"><ShieldCheck className="h-4 w-4 mr-2" /> Validator console</Link>
             </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link to="/dialect-bridge/admin"><ShieldCheck className="h-4 w-4 mr-2" /> Admin · Panel seats</Link>
+            </Button>
             <Button asChild size="lg" variant="ghost">
               <a href="mailto:hello@tandemlearn.app?subject=Dialect%20Bridge%20partnership">
                 <Mail className="h-4 w-4 mr-2" /> Partner with us
