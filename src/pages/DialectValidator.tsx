@@ -334,6 +334,7 @@ export default function DialectValidator() {
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <CardTitle className="text-base">{v.variant_label}</CardTitle>
                   <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="text-xs capitalize">{v.region.replace(/_/g, " ")}</Badge>
                     <Badge variant="outline" className="text-xs">v{v.current_version}</Badge>
                     <Badge variant="outline" className={`text-xs ${STATUS_TONE[v.status] ?? ""}`}>{v.status}</Badge>
                     <Badge variant="outline" className="text-xs">{Math.round(v.confidence * 100)}%</Badge>
