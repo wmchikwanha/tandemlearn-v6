@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Read sign: book gesture -->
+  <circle cx="100" cy="45" r="25" fill="hsl(var(--primary))" opacity="0.8"/>
+  <rect x="80" y="80" width="40" height="50" rx="5" fill="hsl(var(--primary))" opacity="0.8"/>
+  <rect x="60" y="110" width="80" height="50" rx="3" fill="hsl(var(--accent))" opacity="0.7"/>
+  <line x1="100" y1="110" x2="100" y2="160" stroke="hsl(var(--primary))" stroke-width="2"/>
+  <path d="M 70 120 L 60 110 L 60 160" stroke="hsl(var(--primary))" stroke-width="1" fill="none"/>
+</svg>

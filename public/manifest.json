@@ -1,0 +1,40 @@
+{
+  "name": "TandemLearn",
+  "short_name": "TandemLearn",
+  "description": "The Classroom That Adapts to You — Real-time speech-to-text transcription for inclusive education",
+  "theme_color": "#2a9d8f",
+  "background_color": "#0f172a",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Teacher Mode",
+      "short_name": "Teach",
+      "description": "Start broadcasting as a teacher",
+      "url": "/teacher"
+    },
+    {
+      "name": "Student Mode",
+      "short_name": "Learn",
+      "description": "Join as a student",
+      "url": "/student"
+    }
+  ]
+}

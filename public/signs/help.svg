@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Help sign: hands reaching up -->
+  <circle cx="100" cy="50" r="25" fill="hsl(var(--primary))" opacity="0.8"/>
+  <rect x="80" y="85" width="40" height="50" rx="5" fill="hsl(var(--primary))" opacity="0.8"/>
+  <path d="M 60 100 L 80 85 L 85 95 L 70 110 Z" fill="hsl(var(--accent))" opacity="0.9"/>
+  <path d="M 140 100 L 120 85 L 115 95 L 130 110 Z" fill="hsl(var(--accent))" opacity="0.9"/>
+</svg>

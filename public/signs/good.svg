@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Good sign: positive gesture -->
+  <circle cx="100" cy="50" r="25" fill="hsl(var(--primary))" opacity="0.8"/>
+  <rect x="80" y="85" width="40" height="55" rx="5" fill="hsl(var(--primary))" opacity="0.8"/>
+  <path d="M 70 110 L 90 130 L 130 90" stroke="hsl(var(--accent))" stroke-width="6" fill="none" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Write sign: pencil gesture -->
+  <circle cx="100" cy="50" r="25" fill="hsl(var(--primary))" opacity="0.8"/>
+  <rect x="80" y="85" width="40" height="50" rx="5" fill="hsl(var(--primary))" opacity="0.8"/>
+  <path d="M 120 85 L 160 120 L 155 125 L 115 95 Z" fill="hsl(var(--accent))" opacity="0.9"/>
+  <rect x="145" y="125" width="30" height="4" rx="2" fill="hsl(var(--muted-foreground))" opacity="0.5"/>
+</svg>

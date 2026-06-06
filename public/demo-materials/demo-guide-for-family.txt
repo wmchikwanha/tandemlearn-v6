@@ -1,0 +1,252 @@
+==========================================
+TANDEMLEARN DEMO GUIDE
+For Amanda and Family
+==========================================
+
+Hello! This guide will help you use TandemLearn 
+to experience how Amanda can learn with AI assistance.
+
+==========================================
+GETTING STARTED
+==========================================
+
+STEP 1: LOG IN
+--------------
+1. Go to the TandemLearn website
+2. Click "Sign In" 
+3. Enter your username and password
+4. Click "Login"
+
+You will see Amanda's Student Dashboard.
+
+STEP 2: FIND YOUR LESSONS
+-------------------------
+On the dashboard, you will see:
+- Today's lessons
+- All enrolled lessons
+
+Click on a lesson to open it.
+
+==========================================
+USING LESSON MATERIALS
+==========================================
+
+Each lesson has materials uploaded by the teacher.
+Here's what you can do:
+
+VIEWING MATERIALS
+-----------------
+1. Click on a lesson
+2. Look for "Lesson Materials" section
+3. Click on any material to see options
+
+FOR TEXT FILES (like transcripts):
+- Click "Download" to save to your device
+- Click "Chat with AI" to ask questions
+
+FOR LINKS (like YouTube videos):
+- Click to open in new tab
+- Watch the video together as a family
+
+==========================================
+THE AI CHAT FEATURE - VERY IMPORTANT!
+==========================================
+
+This is the BEST feature for learning!
+
+HOW TO USE IT:
+1. Open any lesson material
+2. Click the "Ask AI" button (looks like a robot/chat icon)
+3. A chat window opens
+
+WHAT TO DO:
+- Type your question in the box
+- Press "Send" or the arrow button
+- Wait for the AI to respond
+- Ask follow-up questions!
+
+EXAMPLE QUESTIONS FOR EACH SUBJECT:
+-----------------------------------
+
+ENGLISH (Nouns & Pronouns):
+- "What is the difference between a noun and pronoun?"
+- "Give me 5 examples of proper nouns"
+- "Check if this sentence is correct: Her went to school"
+- "Make a simple quiz about pronouns for me"
+
+MATHEMATICS (Fractions):
+- "Explain what 3/4 means"
+- "Which is bigger: 1/2 or 1/3?"
+- "Give me a word problem about fractions"
+- "How do I add 1/4 + 1/4?"
+
+AGRICULTURE (Plants):
+- "What does photosynthesis mean?"
+- "Why do plants need sunlight?"
+- "What crops grow well in Zimbabwe?"
+- "Explain the plant life cycle simply"
+
+PE & ARTS:
+- "What exercises can I do in a small room?"
+- "How do I draw a face step by step?"
+- "Teach me a clapping rhythm pattern"
+- "What are traditional Zimbabwean games?"
+
+==========================================
+SPECIAL FEATURES FOR AMANDA
+==========================================
+
+TEXT-TO-SPEECH 🔊
+-----------------
+- Look for a speaker icon on text
+- Click it to hear the text read aloud
+- Helpful for checking pronunciation
+
+SIGN LANGUAGE PANEL 🤟
+----------------------
+- On the right side of the screen
+- Shows sign language illustrations
+- Automatically appears for certain words
+- Helps connect English words to signs
+
+LARGE TEXT OPTIONS ♿
+--------------------
+- Go to Accessibility settings
+- Choose larger text size
+- High contrast option available
+
+==========================================
+TIPS FOR FAMILY LEARNING
+==========================================
+
+FOR MUM AND SISTER:
+
+1. SIT TOGETHER
+   - Learn alongside Amanda
+   - Help type questions if needed
+   - Discuss the AI's answers together
+
+2. TAKE TURNS
+   - Let Amanda ask her questions first
+   - Then ask your own questions
+   - Compare what you learned
+
+3. MAKE IT FUN
+   - Celebrate correct answers
+   - Don't worry about mistakes
+   - Learning is a journey!
+
+4. OFFLINE LEARNING
+   - Download materials when online
+   - Review them later without internet
+   - Write questions to ask next time
+
+5. REPEAT LESSONS
+   - Watch videos more than once
+   - Read transcripts multiple times
+   - Ask the AI to explain differently
+
+==========================================
+PRACTICE SESSION PLAN
+==========================================
+
+Try this 30-minute learning session:
+
+MINUTE 1-5: Choose a subject
+- Open the lesson
+- Look at what materials are available
+
+MINUTE 5-15: Watch or read
+- Watch video OR
+- Read through the transcript
+- Take notes on paper
+
+MINUTE 15-25: Ask the AI
+- Open the AI chat
+- Ask at least 3 questions
+- Read the answers carefully
+
+MINUTE 25-30: Review
+- Talk about what you learned
+- Write down one new thing you know
+- Give each other a quiz!
+
+==========================================
+TROUBLESHOOTING
+==========================================
+
+PROBLEM: Can't log in
+SOLUTION: Check username and password are correct.
+Make sure caps lock is off.
+
+PROBLEM: Page won't load
+SOLUTION: Check internet connection. 
+Try refreshing the page.
+
+PROBLEM: AI is slow to respond
+SOLUTION: Wait a few seconds. 
+Good answers take time!
+
+PROBLEM: Can't find a lesson
+SOLUTION: Go back to dashboard. 
+Check "All Lessons" section.
+
+PROBLEM: Video won't play
+SOLUTION: Check internet connection.
+Try a different browser.
+
+==========================================
+WHY TANDEMLEARN HELPS AMANDA
+==========================================
+
+✓ VISUAL LEARNING
+  Materials include images and videos,
+  not just text.
+
+✓ AI ASSISTANCE
+  Can ask unlimited questions,
+  get patient explanations.
+
+✓ SIGN LANGUAGE SUPPORT
+  Visual signs help connect
+  English words to meaning.
+
+✓ FAMILY INVOLVEMENT
+  Mum and sister can help
+  and learn together.
+
+✓ SELF-PACED
+  No pressure. Learn at
+  your own speed.
+
+✓ REPEAT AS NEEDED
+  Watch, read, ask again.
+  No limit on reviewing.
+
+==========================================
+QUESTIONS FOR YOUR TEACHER
+==========================================
+
+After trying TandemLearn, you might want to ask:
+
+1. Can more lessons be added?
+2. How often will new materials be uploaded?
+3. Can we save our chat history with the AI?
+4. Are there more sign language features coming?
+5. Can other subjects be added?
+
+==========================================
+CONTACT
+==========================================
+
+If you have problems or questions:
+- Talk to your teacher
+- Use the Help section in the app
+
+==========================================
+
+Enjoy learning together!
+
+TandemLearn - Making education accessible for everyone.
+
+==========================================

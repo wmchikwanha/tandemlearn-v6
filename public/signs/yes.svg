@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Yes sign: thumbs up -->
+  <circle cx="100" cy="50" r="25" fill="hsl(var(--primary))" opacity="0.8"/>
+  <rect x="80" y="85" width="40" height="50" rx="5" fill="hsl(var(--primary))" opacity="0.8"/>
+  <path d="M 120 100 L 140 70 L 150 75 L 130 105 Z" fill="hsl(var(--accent))" opacity="0.9"/>
+  <circle cx="140" cy="75" r="12" fill="hsl(var(--accent))" opacity="0.9"/>
+</svg>

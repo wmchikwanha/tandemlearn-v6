@@ -1,0 +1,145 @@
+TANDEMLEARN LESSON MATERIAL
+Subject: Mathematics
+Topic: Understanding Fractions
+Grade: 5
+
+---
+
+WELCOME, STUDENT!
+
+Today you will learn about fractions. Fractions help us understand parts of a whole. Let's learn together!
+
+---
+
+SECTION 1: WHAT IS A FRACTION?
+
+A fraction shows PART of something whole.
+
+Think of a cake. If you cut it into 4 equal pieces and take 1 piece, you have taken ONE QUARTER (1/4) of the cake.
+
+A fraction has two parts:
+- NUMERATOR (top number) = how many parts you have
+- DENOMINATOR (bottom number) = how many equal parts in total
+
+Example: 3/4 means you have 3 parts out of 4 equal parts.
+
+---
+
+SECTION 2: VISUALISING FRACTIONS
+
+Imagine a circle (like a chapati or pizza):
+
+ONE HALF (1/2):
+[=========|=========]
+   Left    |   Right
+You take ONE of TWO equal parts.
+
+ONE QUARTER (1/4):
+[====|====|====|====]
+  1  |  2  |  3  |  4
+You take ONE of FOUR equal parts.
+
+THREE QUARTERS (3/4):
+[XXXX|XXXX|XXXX|====]
+The X parts are what you have - THREE of FOUR parts.
+
+---
+
+SECTION 3: FRACTIONS IN EVERYDAY LIFE
+
+TEACHER: I want to help you see fractions around you!
+
+AT HOME:
+- Mum cuts a watermelon into 8 slices. You eat 2. You ate 2/8 of the watermelon.
+- Your family of 4 shares a pizza equally. Each person gets 1/4.
+- You read 5 pages of a 10-page story. You read 5/10 or 1/2 of the story.
+
+TELLING TIME:
+- Quarter past = 1/4 of an hour = 15 minutes
+- Half past = 1/2 of an hour = 30 minutes
+- Quarter to = 3/4 of an hour has passed = 45 minutes
+
+MONEY:
+- If you have $1 and spend 50 cents, you spent 1/2 of your money.
+- If a loaf of bread costs $4 and you pay $1, you paid 1/4 of the cost.
+
+---
+
+SECTION 4: COMPARING FRACTIONS
+
+QUESTION: Which is bigger, 1/2 or 1/4?
+
+THINK about it this way:
+- If you share a cake with 1 friend (2 people), each gets 1/2
+- If you share with 3 friends (4 people), each gets 1/4
+
+1/2 is BIGGER than 1/4 because you share with fewer people!
+
+RULE: When the top number is the same, the SMALLER bottom number means a BIGGER fraction.
+
+1/2 > 1/3 > 1/4 > 1/5
+
+---
+
+SECTION 5: EQUIVALENT FRACTIONS
+
+Some fractions are EQUAL even if they look different.
+
+Look at this:
+1/2 = 2/4 = 4/8
+
+Imagine a chocolate bar:
+- Cut into 2 pieces, take 1 = 1/2
+- Cut into 4 pieces, take 2 = 2/4
+- Cut into 8 pieces, take 4 = 4/8
+
+They are all the SAME amount! These are called EQUIVALENT FRACTIONS.
+
+Good to know: To find equivalent fractions, multiply or divide both numbers by the same amount.
+
+1/2 × 2/2 = 2/4 ✓
+2/4 × 2/2 = 4/8 ✓
+
+---
+
+SECTION 6: PRACTICE PROBLEMS
+
+Try these! Ask the AI if you need help understanding.
+
+EASY:
+1. What fraction is shaded? [XX|==|==|==] Answer: 1/4
+2. What fraction is shaded? [XX|XX|==|==] Answer: 2/4 or 1/2
+3. You have 6 sweets. You give 2 to your sister. What fraction did you give? Answer: 2/6 or 1/3
+
+MEDIUM:
+4. Which is bigger: 1/3 or 1/5? Answer: 1/3 (fewer parts means bigger pieces)
+5. Are 2/4 and 1/2 equivalent? Answer: Yes!
+6. What is 3/4 of 8 mangoes? Answer: 6 mangoes
+
+CHALLENGE:
+7. Mum baked 12 cookies. You ate 1/4 of them. How many did you eat? Answer: 3 cookies
+8. A lesson is 40 minutes. You have done 1/2. How many minutes left? Answer: 20 minutes
+
+---
+
+SECTION 7: REMEMBER THIS!
+
+✓ Fractions show PARTS of a whole
+✓ Top number = parts you have
+✓ Bottom number = total equal parts
+✓ Bigger bottom number = smaller pieces
+✓ Same fractions can look different (equivalent fractions)
+
+---
+
+QUESTIONS TO ASK THE AI:
+
+- "Can you give me more examples of fractions in cooking?"
+- "Help me understand why 1/2 is bigger than 1/4"
+- "What are some fraction word problems I can practice?"
+- "Explain equivalent fractions with pictures"
+
+Good luck with your learning! You are doing well!
+
+---
+END OF LESSON MATERIAL

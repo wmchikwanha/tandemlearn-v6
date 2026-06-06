@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Question sign: question mark gesture -->
+  <circle cx="100" cy="50" r="25" fill="hsl(var(--primary))" opacity="0.8"/>
+  <rect x="80" y="85" width="40" height="50" rx="5" fill="hsl(var(--primary))" opacity="0.8"/>
+  <path d="M 120 85 L 150 60 L 155 70 L 130 90 Z" fill="hsl(var(--primary))" opacity="0.9"/>
+  <text x="150" y="60" font-size="40" fill="hsl(var(--accent))" font-weight="bold">?</text>
+</svg>
