@@ -248,13 +248,23 @@ serve(async (req) => {
     const canPublish = role === 'publisher';
     const canSubscribe = true;
 
-    console.log(`Creating token for ${user.id} in room ${roomName}, role: ${role}`);
+    // Use role-suffixed identity so the same user can simultaneously publish and
+    // subscribe (LiveKit kicks any prior connection with a duplicate identity).
+    // Subscriber identity also gets a short random suffix so multiple tabs/devices
+    // viewing the same lesson don't evict each other.
+    const randomSuffix = Math.random().toString(36).slice(2, 8);
+    const participantIdentity =
+      role === 'publisher'
+        ? `${user.id}__pub`
+        : `${user.id}__sub_${randomSuffix}`;
+
+    console.log(`Creating token for ${participantIdentity} in room ${roomName}, role: ${role}`);
 
     const accessToken = await createLiveKitToken(
       LIVEKIT_API_KEY,
       LIVEKIT_API_SECRET,
       roomName,
-      user.id,
+      participantIdentity,
       displayName,
       canPublish,
       canSubscribe
