@@ -8,11 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShieldCheck, Check, Flag, X, History, Pencil, Save } from "lucide-react";
+import { ShieldCheck, Check, Flag, X, History, Pencil, Save, Search, Inbox } from "lucide-react";
 import { toast } from "sonner";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { ZIM_REGION_LIST } from "@/lib/dialectRouter";
+import ValidatorNotificationPrefs, { loadPrefs, type ValidatorNotifPrefs, DEFAULT_PREFS } from "@/components/dialect/ValidatorNotificationPrefs";
 
 type Variant = {
   id: string;
