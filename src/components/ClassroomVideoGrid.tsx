@@ -34,10 +34,18 @@ export const ClassroomVideoGrid = ({ lessonId, active }: ClassroomVideoGridProps
   const [connectionState, setConnectionState] = useState<ConnectionState>(
     ConnectionState.Disconnected
   );
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const roomRef = useRef<Room | null>(null);
   const videoRefs = useRef<Map<string, HTMLVideoElement | null>>(new Map());
 
+  // Don't render our own publisher feed in our own viewer (we already have a local preview).
+  const isOwnPublisher = useCallback(
+    (identity: string) => !!currentUserId && identity === `${currentUserId}__pub`,
+    [currentUserId]
+  );
+
   const upsertFeed = useCallback((participant: RemoteParticipant, track: RemoteTrack) => {
+    if (isOwnPublisher(participant.identity)) return;
     setFeeds((prev) => {
       const filtered = prev.filter((f) => f.identity !== participant.identity);
       return [
@@ -49,7 +57,7 @@ export const ClassroomVideoGrid = ({ lessonId, active }: ClassroomVideoGridProps
         },
       ];
     });
-  }, []);
+  }, [isOwnPublisher]);
 
   const removeFeed = useCallback((identity: string) => {
     setFeeds((prev) => prev.filter((f) => f.identity !== identity));
