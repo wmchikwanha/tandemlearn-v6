@@ -35,6 +35,7 @@ import ZSLLab from "./pages/ZSLLab";
 import DialectBridge from "./pages/DialectBridge";
 import DialectRouter from "./pages/DialectRouter";
 import DialectValidator from "./pages/DialectValidator";
+import DialectValidatorAdmin from "./pages/DialectValidatorAdmin";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +78,7 @@ const App = () => (
           <Route path="/dialect-bridge" element={<DialectBridge />} />
           <Route path="/dialect-bridge/router" element={<DialectRouter />} />
           <Route path="/dialect-bridge/validator" element={<DialectValidator />} />
+          <Route path="/dialect-bridge/admin" element={<DialectValidatorAdmin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

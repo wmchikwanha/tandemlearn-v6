@@ -92,6 +92,38 @@ export default function DialectValidator() {
 
   useEffect(() => { loadVariants(); }, [loadVariants]);
 
+  // Realtime alerts: notify validator when a variant in their region becomes pending or flagged
+  useEffect(() => {
+    if (regions.length === 0) return;
+    const regionSet = new Set(regions);
+    const channel = supabase
+      .channel("dialect-variant-alerts")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "dialect_variants" }, (payload) => {
+        const row: any = payload.new;
+        if (!regionSet.has(row.region)) return;
+        if (row.status !== "pending") return;
+        toast.message(`New variant pending review · ${row.region.replace(/_/g, " ")}`, {
+          description: row.variant_label,
+          action: { label: "Open", onClick: () => { setActiveRegion(row.region); setStatusFilter("pending"); } },
+        });
+        if (row.region === activeRegion) loadVariants();
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "dialect_variants" }, (payload) => {
+        const row: any = payload.new;
+        const old: any = payload.old;
+        if (!regionSet.has(row.region)) return;
+        if (row.status === "flagged" && old?.status !== "flagged") {
+          toast.warning(`Variant flagged · ${row.region.replace(/_/g, " ")}`, {
+            description: row.variant_label,
+            action: { label: "Open", onClick: () => { setActiveRegion(row.region); setStatusFilter("flagged"); } },
+          });
+          if (row.region === activeRegion) loadVariants();
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [regions, activeRegion, loadVariants]);
+
   const openVariant = async (v: Variant) => {
     if (expanded === v.id) { setExpanded(null); return; }
     setExpanded(v.id);
