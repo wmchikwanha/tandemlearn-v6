@@ -161,6 +161,62 @@ export type Database = {
         }
         Relationships: []
       }
+      dialect_variants: {
+        Row: {
+          confidence: number
+          created_at: string
+          current_version: number
+          description: string | null
+          id: string
+          notation: string | null
+          region: string
+          status: string
+          submitted_by: string | null
+          universal_sign_id: string
+          updated_at: string
+          variant_label: string
+          video_url: string | null
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          current_version?: number
+          description?: string | null
+          id?: string
+          notation?: string | null
+          region: string
+          status?: string
+          submitted_by?: string | null
+          universal_sign_id: string
+          updated_at?: string
+          variant_label: string
+          video_url?: string | null
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          current_version?: number
+          description?: string | null
+          id?: string
+          notation?: string | null
+          region?: string
+          status?: string
+          submitted_by?: string | null
+          universal_sign_id?: string
+          updated_at?: string
+          variant_label?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dialect_variants_universal_sign_id_fkey"
+            columns: ["universal_sign_id"]
+            isOneToOne: false
+            referencedRelation: "universal_signs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guardian_access_codes: {
         Row: {
           access_code: string
@@ -942,6 +998,39 @@ export type Database = {
           },
         ]
       }
+      universal_signs: {
+        Row: {
+          category: string | null
+          concept_description: string
+          created_at: string
+          created_by: string | null
+          gloss: string
+          id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          concept_description: string
+          created_at?: string
+          created_by?: string | null
+          gloss: string
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          concept_description?: string
+          created_at?: string
+          created_by?: string | null
+          gloss?: string
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -963,6 +1052,125 @@ export type Database = {
         }
         Relationships: []
       }
+      validator_panel_members: {
+        Row: {
+          created_at: string
+          id: string
+          is_deaf_signer: boolean
+          panel_role: string
+          region: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_deaf_signer?: boolean
+          panel_role?: string
+          region: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_deaf_signer?: boolean
+          panel_role?: string
+          region?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      variant_reviews: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          notes: string | null
+          reviewer_id: string
+          variant_id: string
+          version_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reviewer_id: string
+          variant_id: string
+          version_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reviewer_id?: string
+          variant_id?: string
+          version_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "variant_reviews_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "dialect_variants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "variant_reviews_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "variant_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      variant_versions: {
+        Row: {
+          change_note: string | null
+          created_at: string
+          description: string | null
+          edited_by: string | null
+          id: string
+          notation: string | null
+          variant_id: string
+          variant_label: string
+          version_number: number
+          video_url: string | null
+        }
+        Insert: {
+          change_note?: string | null
+          created_at?: string
+          description?: string | null
+          edited_by?: string | null
+          id?: string
+          notation?: string | null
+          variant_id: string
+          variant_label: string
+          version_number: number
+          video_url?: string | null
+        }
+        Update: {
+          change_note?: string | null
+          created_at?: string
+          description?: string | null
+          edited_by?: string | null
+          id?: string
+          notation?: string | null
+          variant_id?: string
+          variant_label?: string
+          version_number?: number
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "variant_versions_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "dialect_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -977,6 +1185,10 @@ export type Database = {
       }
       is_lesson_teacher: {
         Args: { _lesson_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_validator: {
+        Args: { _region: string; _user_id: string }
         Returns: boolean
       }
       validate_invitation_token: { Args: { _token: string }; Returns: Json }
