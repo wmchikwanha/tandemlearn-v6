@@ -186,6 +186,27 @@ export default function DialectValidator() {
     const { error } = await supabase.from("dialect_variants").update({ status }).eq("id", v.id);
     if (error) return toast.error(error.message);
     await recordReview(v.id, status === "approved" ? "approve" : status === "flagged" ? "flag" : "reject", reviewNote.trim() || undefined);
+
+    // Concept 3: broadcast approval so online devices refresh their IndexedDB
+    // variant cache immediately. Triggered only by human approval action.
+    if (status === "approved") {
+      try {
+        const { data: fresh } = await supabase
+          .from("dialect_variants")
+          .select("id, universal_sign_id, region, variant_label, video_url, notation, current_version, updated_at")
+          .eq("id", v.id)
+          .maybeSingle();
+        if (fresh) {
+          const ch = supabase.channel("zsl_variant_updates");
+          await ch.subscribe();
+          await ch.send({ type: "broadcast", event: "variant_approved", payload: fresh });
+          supabase.removeChannel(ch);
+        }
+      } catch (e) {
+        console.error("[validator] broadcast emit failed", e);
+      }
+    }
+
     toast.success(`Marked ${status}.`);
     setReviewNote("");
     loadVariants();
