@@ -36,6 +36,10 @@ import DialectBridge from "./pages/DialectBridge";
 import DialectRouter from "./pages/DialectRouter";
 import DialectValidator from "./pages/DialectValidator";
 import DialectValidatorAdmin from "./pages/DialectValidatorAdmin";
+import TeacherToday from "./pages/teacher/Today";
+import TeacherPolicies from "./pages/teacher/Policies";
+import ActionCenter from "./pages/teacher/ActionCenter";
+import Harmonization from "./pages/admin/Harmonization";
 
 const queryClient = new QueryClient();
 
