@@ -58,7 +58,13 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/role-selection" element={<RoleSelection />} />
           <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/teacher" element={<TeacherDashboard />} />
+          <Route path="/teacher" element={<TeacherToday />} />
+          <Route path="/today" element={<TeacherToday />} />
+          <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+          <Route path="/teacher/today" element={<TeacherToday />} />
+          <Route path="/teacher/policies" element={<TeacherPolicies />} />
+          <Route path="/teacher/action-center" element={<ActionCenter />} />
+          <Route path="/admin/harmonization" element={<Harmonization />} />
           <Route path="/teacher/broadcast/:lessonId" element={<TeacherBroadcast />} />
           <Route path="/teacher/lessons" element={<TeacherLessons />} />
           <Route path="/teacher/legacy" element={<Teacher />} />
