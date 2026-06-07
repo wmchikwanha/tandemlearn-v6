@@ -83,6 +83,92 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_context_pool: {
+        Row: {
+          agent_name: string
+          consumed_by: string[]
+          content: Json
+          context_type: string
+          created_at: string
+          expires_at: string
+          id: string
+          lesson_id: string | null
+          priority: number
+          session_name: string | null
+        }
+        Insert: {
+          agent_name: string
+          consumed_by?: string[]
+          content?: Json
+          context_type: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          lesson_id?: string | null
+          priority?: number
+          session_name?: string | null
+        }
+        Update: {
+          agent_name?: string
+          consumed_by?: string[]
+          content?: Json
+          context_type?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          lesson_id?: string | null
+          priority?: number
+          session_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_context_pool_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_policies: {
+        Row: {
+          action_type: string
+          agent_name: string
+          approval_timeout_seconds: number
+          auto_execute: boolean
+          created_at: string
+          escalation_target: string
+          id: string
+          requires_approval: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          agent_name: string
+          approval_timeout_seconds?: number
+          auto_execute?: boolean
+          created_at?: string
+          escalation_target?: string
+          id?: string
+          requires_approval?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          agent_name?: string
+          approval_timeout_seconds?: number
+          auto_execute?: boolean
+          created_at?: string
+          escalation_target?: string
+          id?: string
+          requires_approval?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       curriculum_documents: {
         Row: {
           created_at: string
@@ -225,6 +311,7 @@ export type Database = {
           id: string
           is_active: boolean
           last_accessed_at: string | null
+          last_viewed_at: string | null
           student_id: string
           student_name: string
           teacher_id: string
@@ -236,6 +323,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           last_accessed_at?: string | null
+          last_viewed_at?: string | null
           student_id: string
           student_name: string
           teacher_id: string
@@ -247,6 +335,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           last_accessed_at?: string | null
+          last_viewed_at?: string | null
           student_id?: string
           student_name?: string
           teacher_id?: string
@@ -491,6 +580,56 @@ export type Database = {
           video_active?: boolean | null
         }
         Relationships: []
+      }
+      mhandara_alerts: {
+        Row: {
+          action_payload: Json | null
+          alert_type: string
+          body: string
+          created_at: string
+          expires_at: string
+          id: string
+          is_dismissed: boolean
+          is_read: boolean
+          lesson_id: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          action_payload?: Json | null
+          alert_type: string
+          body: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_dismissed?: boolean
+          is_read?: boolean
+          lesson_id?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          action_payload?: Json | null
+          alert_type?: string
+          body?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_dismissed?: boolean
+          is_read?: boolean
+          lesson_id?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mhandara_alerts_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pre_lesson_briefings: {
         Row: {
@@ -997,6 +1136,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      teacher_today_state: {
+        Row: {
+          alert_count: number
+          at_risk_count: number
+          date: string
+          dialect_bridge_auto_enabled: number
+          id: string
+          last_computed_at: string
+          lessons: Json
+          pre_lesson_briefings_sent: number
+          suggestions: Json
+          teacher_id: string
+        }
+        Insert: {
+          alert_count?: number
+          at_risk_count?: number
+          date?: string
+          dialect_bridge_auto_enabled?: number
+          id?: string
+          last_computed_at?: string
+          lessons?: Json
+          pre_lesson_briefings_sent?: number
+          suggestions?: Json
+          teacher_id: string
+        }
+        Update: {
+          alert_count?: number
+          at_risk_count?: number
+          date?: string
+          dialect_bridge_auto_enabled?: number
+          id?: string
+          last_computed_at?: string
+          lessons?: Json
+          pre_lesson_briefings_sent?: number
+          suggestions?: Json
+          teacher_id?: string
+        }
+        Relationships: []
       }
       universal_signs: {
         Row: {
