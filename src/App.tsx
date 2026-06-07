@@ -40,14 +40,21 @@ import TeacherToday from "./pages/teacher/Today";
 import TeacherPolicies from "./pages/teacher/Policies";
 import ActionCenter from "./pages/teacher/ActionCenter";
 import Harmonization from "./pages/admin/Harmonization";
+import { useVariantApprovalSync } from "@/hooks/useVariantApprovalSync";
 
 const queryClient = new QueryClient();
+
+const VariantSyncMount = () => {
+  useVariantApprovalSync();
+  return null;
+};
 
 const App = () => (
   <LanguageProvider>
   <AccessibilityProvider>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <VariantSyncMount />
       <OfflineBanner />
       <DataSaverBanner />
       <Toaster />

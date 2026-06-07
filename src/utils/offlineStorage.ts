@@ -53,10 +53,25 @@ interface OfflineDBSchema extends DBSchema {
       updatedAt: string;
     };
   };
+  variantCache: {
+    key: string;
+    value: {
+      id: string;
+      universalSignId: string;
+      region: string;
+      variantLabel: string;
+      videoUrl: string | null;
+      notation: string | null;
+      currentVersion: number;
+      updatedAt: string;
+      cachedAt: string;
+    };
+    indexes: { 'by-sign-region': [string, string] };
+  };
 }
 
 const DB_NAME = 'tandemlearn-offline';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbInstance: IDBPDatabase<OfflineDBSchema> | null = null;
 
@@ -90,6 +105,12 @@ export const getDB = async (): Promise<IDBPDatabase<OfflineDBSchema>> => {
       // App state store
       if (!db.objectStoreNames.contains('appState')) {
         db.createObjectStore('appState', { keyPath: 'key' });
+      }
+
+      // Approved-variant cache (Concept 3 — refreshed by validator approvals)
+      if (!db.objectStoreNames.contains('variantCache')) {
+        const variantStore = db.createObjectStore('variantCache', { keyPath: 'id' });
+        variantStore.createIndex('by-sign-region', ['universalSignId', 'region']);
       }
     },
   });
@@ -288,5 +309,45 @@ export const clearAllOfflineData = async () => {
     db.clear('syncQueue'),
     db.clear('lessonCache'),
     db.clear('appState'),
+    db.clear('variantCache'),
   ]);
+};
+
+// ==================== APPROVED-VARIANT CACHE (Concept 3) ====================
+
+export const cacheApprovedVariant = async (variant: {
+  id: string;
+  universalSignId: string;
+  region: string;
+  variantLabel: string;
+  videoUrl: string | null;
+  notation: string | null;
+  currentVersion: number;
+  updatedAt: string;
+}) => {
+  const db = await getDB();
+  await db.put('variantCache', {
+    ...variant,
+    cachedAt: new Date().toISOString(),
+  });
+};
+
+export const getCachedVariant = async (id: string) => {
+  const db = await getDB();
+  return db.get('variantCache', id);
+};
+
+export const getCachedVariantsForSign = async (
+  universalSignId: string,
+  region: string,
+) => {
+  const db = await getDB();
+  const tx = db.transaction('variantCache', 'readonly');
+  const index = tx.store.index('by-sign-region');
+  return index.getAll([universalSignId, region] as any);
+};
+
+export const invalidateVariantCache = async (id: string) => {
+  const db = await getDB();
+  await db.delete('variantCache', id);
 };
