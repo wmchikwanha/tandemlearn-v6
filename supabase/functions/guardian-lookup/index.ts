@@ -51,7 +51,7 @@ serve(async (req) => {
     // Update last accessed
     await supabase
       .from('guardian_access_codes')
-      .update({ last_accessed_at: new Date().toISOString() })
+      .update({ last_accessed_at: new Date().toISOString(), last_viewed_at: new Date().toISOString() })
       .eq('id', codeData.id);
 
     const studentId = codeData.student_id;
