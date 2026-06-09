@@ -209,6 +209,15 @@ You MUST also populate:
                     description: "2-4 things to revise",
                   },
                   lesson_title: { type: "string" },
+                  difficult_concept: {
+                    type: "string",
+                    description: "Single hardest concept (only when comprehension was flagged as difficult)",
+                  },
+                  guided_review: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "3-5 step-by-step explanations of the difficult_concept, simple language, building progressively. Only when comprehension was flagged.",
+                  },
                 },
                 required: ["key_points", "vocabulary", "revision_notes", "lesson_title"],
                 additionalProperties: false,
