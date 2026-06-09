@@ -205,6 +205,38 @@ export const LessonSummaryCard = ({
           </div>
         </div>
 
+        {/* Guided Review (only when Nzwisiso flagged comprehension difficulty) */}
+        {summary.guided_review && summary.guided_review.length > 0 && (
+          <Collapsible defaultOpen className="rounded-lg border-2 border-accent/40 bg-accent/5">
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left">
+              <div className="flex items-center gap-2">
+                <GraduationCap className="h-5 w-5 text-accent" />
+                <div>
+                  <p className="font-semibold text-sm">Study This Again</p>
+                  {summary.difficult_concept && (
+                    <p className="text-xs text-muted-foreground">
+                      Step-by-step: {summary.difficult_concept}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <ChevronDown className="h-4 w-4 shrink-0 transition-transform [&[data-state=open]]:rotate-180" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 pb-4">
+              <ol className="space-y-3">
+                {summary.guided_review.map((step, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs font-bold">
+                      {i + 1}
+                    </span>
+                    <span className="pt-0.5">{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+
         {/* Revision Notes */}
         <div>
           <h4 className="font-semibold flex items-center gap-2 mb-3">
