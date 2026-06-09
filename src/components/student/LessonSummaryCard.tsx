@@ -26,6 +26,8 @@ interface SummaryData {
   vocabulary: VocabItem[];
   revision_notes: string[];
   lesson_title: string;
+  difficult_concept?: string;
+  guided_review?: string[];
 }
 
 interface LessonSummaryCardProps {
