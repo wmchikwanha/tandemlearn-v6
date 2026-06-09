@@ -117,6 +117,29 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY not configured");
     }
 
+    // 5a. Check Nzwisiso comprehension flags for this session
+    const { data: nzwisisoActions } = await supabase
+      .from("agent_actions")
+      .select("output_summary, impact_metric")
+      .eq("agent_name", "Nzwisiso Edu")
+      .eq("session_name", session_name)
+      .eq("action_type", "comprehension_monitor")
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    const comprehensionFlagged = (nzwisisoActions || []).some((a: any) => {
+      const m = a.impact_metric || {};
+      return (m.grade_level && m.grade_level > 10) || (m.complex_word_ratio && m.complex_word_ratio > 20);
+    });
+    const gradeHint = (nzwisisoActions || [])[0]?.impact_metric?.grade_level;
+    const nzwisisoSignals = (nzwisisoActions || [])
+      .map((a: any) => a.output_summary)
+      .filter(Boolean)
+      .slice(0, 3)
+      .join(" | ");
+
+    console.log(`[Chidzidzo] Nzwisiso comprehension flagged: ${comprehensionFlagged}`);
+
     const systemPrompt = `You are Chidzidzo, an educational AI agent for deaf and hard-of-hearing students in Zimbabwe. Your job is to create lesson summaries that are:
 - Written in simple, clear English (many students use sign language as their first language)
 - Visually structured with short bullet points
@@ -134,7 +157,13 @@ ${transcript.slice(0, 8000)}
 Please create:
 1. A list of 3-6 key points from this lesson (short, simple sentences)
 2. A list of 5-10 important vocabulary words with simple definitions and example sentences
-3. A "What to Revise" section with 2-4 things the student should review`;
+3. A "What to Revise" section with 2-4 things the student should review${comprehensionFlagged ? `
+
+IMPORTANT — Comprehension Difficulty Flagged by Nzwisiso:
+The live comprehension monitor flagged this lesson as difficult (signals: ${nzwisisoSignals}${gradeHint ? `, peak Grade ${gradeHint}` : ''}).
+You MUST also populate:
+- "difficult_concept": the single hardest concept from this lesson (short phrase)
+- "guided_review": 3-5 step-by-step explanations of that concept, written in very simple language for the student's grade level. Each step builds on the previous one. Use analogies and concrete examples from Southern African daily life where possible.` : ''}`;
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -180,6 +209,15 @@ Please create:
                     description: "2-4 things to revise",
                   },
                   lesson_title: { type: "string" },
+                  difficult_concept: {
+                    type: "string",
+                    description: "Single hardest concept (only when comprehension was flagged as difficult)",
+                  },
+                  guided_review: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "3-5 step-by-step explanations of the difficult_concept, simple language, building progressively. Only when comprehension was flagged.",
+                  },
                 },
                 required: ["key_points", "vocabulary", "revision_notes", "lesson_title"],
                 additionalProperties: false,

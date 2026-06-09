@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, BookOpen, RefreshCw, CheckCircle2, Plus, Globe } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Sparkles, BookOpen, RefreshCw, CheckCircle2, Plus, Globe, GraduationCap, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -25,6 +26,8 @@ interface SummaryData {
   vocabulary: VocabItem[];
   revision_notes: string[];
   lesson_title: string;
+  difficult_concept?: string;
+  guided_review?: string[];
 }
 
 interface LessonSummaryCardProps {
@@ -201,6 +204,38 @@ export const LessonSummaryCard = ({
             ))}
           </div>
         </div>
+
+        {/* Guided Review (only when Nzwisiso flagged comprehension difficulty) */}
+        {summary.guided_review && summary.guided_review.length > 0 && (
+          <Collapsible defaultOpen className="rounded-lg border-2 border-accent/40 bg-accent/5">
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left">
+              <div className="flex items-center gap-2">
+                <GraduationCap className="h-5 w-5 text-accent" />
+                <div>
+                  <p className="font-semibold text-sm">Study This Again</p>
+                  {summary.difficult_concept && (
+                    <p className="text-xs text-muted-foreground">
+                      Step-by-step: {summary.difficult_concept}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <ChevronDown className="h-4 w-4 shrink-0 transition-transform [&[data-state=open]]:rotate-180" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 pb-4">
+              <ol className="space-y-3">
+                {summary.guided_review.map((step, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs font-bold">
+                      {i + 1}
+                    </span>
+                    <span className="pt-0.5">{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
 
         {/* Revision Notes */}
         <div>
