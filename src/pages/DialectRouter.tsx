@@ -28,7 +28,22 @@ export default function DialectRouter() {
   const [variantLabel, setVariantLabel] = useState("");
   const [variantDesc, setVariantDesc] = useState("");
   const [notation, setNotation] = useState("");
+  const [submitRegion, setSubmitRegion] = useState<string>("Masvingo");
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const ACCEPTED_TYPES = "audio/*,video/*,image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown,.md";
+  const MAX_BYTES = 50 * 1024 * 1024; // 50 MB
+
+  const classifyMedia = (file: File): string => {
+    if (file.type.startsWith("audio/")) return "audio";
+    if (file.type.startsWith("video/")) return "video";
+    if (file.type.startsWith("image/")) return "image";
+    if (file.type === "application/pdf") return "pdf";
+    if (file.type.includes("word") || file.name.match(/\.docx?$/i)) return "word";
+    if (file.type === "text/markdown" || file.name.match(/\.md$/i)) return "markdown";
+    return "text";
+  };
 
   const run = async () => {
     if (!gloss.trim()) return;
