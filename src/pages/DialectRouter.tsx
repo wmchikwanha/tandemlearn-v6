@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeftRight, Send, Sparkles, Type } from "lucide-react";
+import { ArrowLeftRight, Send, Sparkles, Type, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,7 +28,22 @@ export default function DialectRouter() {
   const [variantLabel, setVariantLabel] = useState("");
   const [variantDesc, setVariantDesc] = useState("");
   const [notation, setNotation] = useState("");
+  const [submitRegion, setSubmitRegion] = useState<string>("Masvingo");
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const ACCEPTED_TYPES = "audio/*,video/*,image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown,.md";
+  const MAX_BYTES = 50 * 1024 * 1024; // 50 MB
+
+  const classifyMedia = (file: File): string => {
+    if (file.type.startsWith("audio/")) return "audio";
+    if (file.type.startsWith("video/")) return "video";
+    if (file.type.startsWith("image/")) return "image";
+    if (file.type === "application/pdf") return "pdf";
+    if (file.type.includes("word") || file.name.match(/\.docx?$/i)) return "word";
+    if (file.type === "text/markdown" || file.name.match(/\.md$/i)) return "markdown";
+    return "text";
+  };
 
   const run = async () => {
     if (!gloss.trim()) return;
@@ -63,22 +78,50 @@ export default function DialectRouter() {
       setSubmitting(false);
       return;
     }
+
+    let mediaUrl: string | null = null;
+    let mediaType: string | null = null;
+    if (mediaFile) {
+      if (mediaFile.size > MAX_BYTES) {
+        toast.error("File exceeds 50 MB.");
+        setSubmitting(false);
+        return;
+      }
+      const safeName = mediaFile.name.replace(/[^\w.\-]+/g, "_");
+      const path = `${user.id}/${Date.now()}_${safeName}`;
+      const { error: upErr } = await supabase.storage
+        .from("dialect-variant-media")
+        .upload(path, mediaFile, { contentType: mediaFile.type || undefined, upsert: false });
+      if (upErr) {
+        toast.error(`Upload failed: ${upErr.message}`);
+        setSubmitting(false);
+        return;
+      }
+      const { data: signed } = await supabase.storage
+        .from("dialect-variant-media")
+        .createSignedUrl(path, 60 * 60 * 24 * 365);
+      mediaUrl = signed?.signedUrl ?? path;
+      mediaType = classifyMedia(mediaFile);
+    }
+
     const { error } = await supabase.from("dialect_variants").insert({
       universal_sign_id: universal.id,
-      region,
+      region: submitRegion,
       variant_label: variantLabel.trim(),
       description: variantDesc.trim(),
       notation: notation.trim() || null,
+      media_url: mediaUrl,
+      media_type: mediaType,
       submitted_by: user.id,
       status: "pending",
-    });
+    } as never);
     setSubmitting(false);
     if (error) {
       toast.error(error.message);
       return;
     }
     toast.success("Submitted to the regional validator panel.");
-    setVariantLabel(""); setVariantDesc(""); setNotation("");
+    setVariantLabel(""); setVariantDesc(""); setNotation(""); setMediaFile(null);
     run();
   };
 
@@ -176,23 +219,55 @@ export default function DialectRouter() {
           <CardHeader><CardTitle className="text-lg">Missing a variant? Submit one</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Submissions land as <b>pending</b> for the <b>{region.replace(/_/g, " ")}</b> validator panel.
+              Submissions land as <b>pending</b> for the <b>{submitRegion.replace(/_/g, " ")}</b> validator panel.
               No variant becomes canonical without deaf-led approval. Versioning is automatic — every edit
               creates a new revision you can roll back to.
             </p>
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
+                <Label>Region</Label>
+                <Select value={submitRegion} onValueChange={setSubmitRegion}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {ZIM_REGION_LIST.map((r) => <SelectItem key={r} value={r}>{r.replace(/_/g, " ")}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
                 <Label>Variant label</Label>
                 <Input value={variantLabel} onChange={(e) => setVariantLabel(e.target.value)} placeholder="e.g. Emerald Hill cup-to-mouth" />
               </div>
-              <div className="space-y-1.5">
-                <Label>Notation (optional)</Label>
-                <Input value={notation} onChange={(e) => setNotation(e.target.value)} placeholder="e.g. flat-C → mouth ×2" />
-              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Notation (optional)</Label>
+              <Input value={notation} onChange={(e) => setNotation(e.target.value)} placeholder="e.g. flat-C → mouth ×2" />
             </div>
             <div className="space-y-1.5">
               <Label>Description of the sign</Label>
               <Textarea value={variantDesc} onChange={(e) => setVariantDesc(e.target.value)} rows={3} placeholder="Handshape, movement, location — describe in plain language." />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Attach evidence (optional)</Label>
+              <p className="text-xs text-muted-foreground">Audio, video, image, PDF, Word, .txt or .md — max 50 MB.</p>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="file"
+                  accept={ACCEPTED_TYPES}
+                  onChange={(e) => setMediaFile(e.target.files?.[0] ?? null)}
+                  className="cursor-pointer"
+                />
+                {mediaFile && (
+                  <Button type="button" variant="ghost" size="icon" onClick={() => setMediaFile(null)} aria-label="Remove file">
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              {mediaFile && (
+                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Upload className="h-3 w-3" />
+                  {mediaFile.name} · {(mediaFile.size / 1024 / 1024).toFixed(2)} MB · {classifyMedia(mediaFile)}
+                </div>
+              )}
             </div>
             <Button onClick={submitVariant} disabled={submitting} className="gap-2">
               <Send className="h-4 w-4" /> {submitting ? "Submitting…" : "Submit for panel review"}
