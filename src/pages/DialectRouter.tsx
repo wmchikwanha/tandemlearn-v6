@@ -114,7 +114,7 @@ export default function DialectRouter() {
       media_type: mediaType,
       submitted_by: user.id,
       status: "pending",
-    });
+    } as never);
     setSubmitting(false);
     if (error) {
       toast.error(error.message);
