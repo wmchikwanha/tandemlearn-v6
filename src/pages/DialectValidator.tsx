@@ -259,20 +259,8 @@ export default function DialectValidator() {
     );
   }
 
-  if (regions.length === 0) {
-    return (
-      <div className="min-h-screen bg-background">
-        <header className="border-b bg-card"><div className="container mx-auto px-4 py-6">
-          <Link to="/dialect-bridge" className="text-sm text-muted-foreground hover:text-primary">← Dialect Bridge</Link>
-        </div></header>
-        <main className="container mx-auto px-4 py-16 max-w-xl text-center space-y-3">
-          <ShieldCheck className="h-10 w-10 mx-auto text-muted-foreground" />
-          <h1 className="text-2xl font-bold">You're not on a validator panel yet</h1>
-          <p className="text-muted-foreground">Panel seats are appointed by deaf-led regional chairs. Ask an admin to add you.</p>
-        </main>
-      </div>
-    );
-  }
+  // Open-access: no panel gate. Every signed-in user enters the console.
+
 
   return (
     <div className="min-h-screen bg-background">
