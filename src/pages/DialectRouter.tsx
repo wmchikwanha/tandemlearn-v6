@@ -78,12 +78,40 @@ export default function DialectRouter() {
       setSubmitting(false);
       return;
     }
+
+    let mediaUrl: string | null = null;
+    let mediaType: string | null = null;
+    if (mediaFile) {
+      if (mediaFile.size > MAX_BYTES) {
+        toast.error("File exceeds 50 MB.");
+        setSubmitting(false);
+        return;
+      }
+      const safeName = mediaFile.name.replace(/[^\w.\-]+/g, "_");
+      const path = `${user.id}/${Date.now()}_${safeName}`;
+      const { error: upErr } = await supabase.storage
+        .from("dialect-variant-media")
+        .upload(path, mediaFile, { contentType: mediaFile.type || undefined, upsert: false });
+      if (upErr) {
+        toast.error(`Upload failed: ${upErr.message}`);
+        setSubmitting(false);
+        return;
+      }
+      const { data: signed } = await supabase.storage
+        .from("dialect-variant-media")
+        .createSignedUrl(path, 60 * 60 * 24 * 365);
+      mediaUrl = signed?.signedUrl ?? path;
+      mediaType = classifyMedia(mediaFile);
+    }
+
     const { error } = await supabase.from("dialect_variants").insert({
       universal_sign_id: universal.id,
-      region,
+      region: submitRegion,
       variant_label: variantLabel.trim(),
       description: variantDesc.trim(),
       notation: notation.trim() || null,
+      media_url: mediaUrl,
+      media_type: mediaType,
       submitted_by: user.id,
       status: "pending",
     });
@@ -93,7 +121,7 @@ export default function DialectRouter() {
       return;
     }
     toast.success("Submitted to the regional validator panel.");
-    setVariantLabel(""); setVariantDesc(""); setNotation("");
+    setVariantLabel(""); setVariantDesc(""); setNotation(""); setMediaFile(null);
     run();
   };
 
