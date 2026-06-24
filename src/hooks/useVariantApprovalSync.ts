@@ -56,9 +56,11 @@ export const useVariantApprovalSync = () => {
               currentVersion: newRow.current_version,
               updatedAt: newRow.updated_at,
             });
+            invalidateQueries();
           } catch (e) {
             console.error("[variant-sync] cache write failed", e);
           }
+
         },
       )
       .on(
