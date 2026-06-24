@@ -71,11 +71,13 @@ export const useVariantApprovalSync = () => {
           if (oldRow?.id) {
             try {
               await invalidateVariantCache(oldRow.id);
+              invalidateQueries();
             } catch (e) {
               console.error("[variant-sync] cache invalidation failed", e);
             }
           }
         },
+
       )
       .subscribe();
 
