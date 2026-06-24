@@ -21,6 +21,7 @@ export const useVariantApprovalSync = () => {
   };
 
   useEffect(() => {
+
     // 1. Postgres changes channel — fires for any UPDATE on dialect_variants
     const pgChannel = supabase
       .channel("dialect_variants_approvals")
