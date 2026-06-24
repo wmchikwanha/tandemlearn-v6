@@ -219,23 +219,55 @@ export default function DialectRouter() {
           <CardHeader><CardTitle className="text-lg">Missing a variant? Submit one</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Submissions land as <b>pending</b> for the <b>{region.replace(/_/g, " ")}</b> validator panel.
+              Submissions land as <b>pending</b> for the <b>{submitRegion.replace(/_/g, " ")}</b> validator panel.
               No variant becomes canonical without deaf-led approval. Versioning is automatic — every edit
               creates a new revision you can roll back to.
             </p>
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
+                <Label>Region</Label>
+                <Select value={submitRegion} onValueChange={setSubmitRegion}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {ZIM_REGION_LIST.map((r) => <SelectItem key={r} value={r}>{r.replace(/_/g, " ")}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
                 <Label>Variant label</Label>
                 <Input value={variantLabel} onChange={(e) => setVariantLabel(e.target.value)} placeholder="e.g. Emerald Hill cup-to-mouth" />
               </div>
-              <div className="space-y-1.5">
-                <Label>Notation (optional)</Label>
-                <Input value={notation} onChange={(e) => setNotation(e.target.value)} placeholder="e.g. flat-C → mouth ×2" />
-              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Notation (optional)</Label>
+              <Input value={notation} onChange={(e) => setNotation(e.target.value)} placeholder="e.g. flat-C → mouth ×2" />
             </div>
             <div className="space-y-1.5">
               <Label>Description of the sign</Label>
               <Textarea value={variantDesc} onChange={(e) => setVariantDesc(e.target.value)} rows={3} placeholder="Handshape, movement, location — describe in plain language." />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Attach evidence (optional)</Label>
+              <p className="text-xs text-muted-foreground">Audio, video, image, PDF, Word, .txt or .md — max 50 MB.</p>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="file"
+                  accept={ACCEPTED_TYPES}
+                  onChange={(e) => setMediaFile(e.target.files?.[0] ?? null)}
+                  className="cursor-pointer"
+                />
+                {mediaFile && (
+                  <Button type="button" variant="ghost" size="icon" onClick={() => setMediaFile(null)} aria-label="Remove file">
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              {mediaFile && (
+                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Upload className="h-3 w-3" />
+                  {mediaFile.name} · {(mediaFile.size / 1024 / 1024).toFixed(2)} MB · {classifyMedia(mediaFile)}
+                </div>
+              )}
             </div>
             <Button onClick={submitVariant} disabled={submitting} className="gap-2">
               <Send className="h-4 w-4" /> {submitting ? "Submitting…" : "Submit for panel review"}
