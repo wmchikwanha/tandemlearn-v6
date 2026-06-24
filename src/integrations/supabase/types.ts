@@ -254,6 +254,8 @@ export type Database = {
           current_version: number
           description: string | null
           id: string
+          media_type: string | null
+          media_url: string | null
           notation: string | null
           region: string
           status: string
@@ -269,6 +271,8 @@ export type Database = {
           current_version?: number
           description?: string | null
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           notation?: string | null
           region: string
           status?: string
@@ -284,6 +288,8 @@ export type Database = {
           current_version?: number
           description?: string | null
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           notation?: string | null
           region?: string
           status?: string
