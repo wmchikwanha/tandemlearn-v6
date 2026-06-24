@@ -49,7 +49,9 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 export default function DialectValidator() {
+  const [searchParams] = useSearchParams();
   const [userId, setUserId] = useState<string | null>(null);
+
   const [regions, setRegions] = useState<string[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [activeRegion, setActiveRegion] = useState<string>("__all__");
