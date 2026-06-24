@@ -102,8 +102,10 @@ export const useVariantApprovalSync = () => {
           currentVersion: p.current_version ?? 1,
           updatedAt: p.updated_at ?? new Date().toISOString(),
         });
+        invalidateQueries();
       })
       .subscribe();
+
 
     return () => {
       supabase.removeChannel(pgChannel);
