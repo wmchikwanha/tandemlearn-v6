@@ -77,6 +77,16 @@ export default function DialectValidator() {
     return () => window.removeEventListener("validator-prefs-changed", onChange);
   }, []);
 
+  // Deep-link from Harmonization hotspot table: ?gloss=...&region=...
+  useEffect(() => {
+    const g = searchParams.get("gloss");
+    const r = searchParams.get("region");
+    if (g) setSearchQuery(g);
+    if (r) setActiveRegion(r);
+    if (g || r) setStatusFilter("all");
+  }, [searchParams]);
+
+
   useEffect(() => {
     (async () => {
       const { data: u } = await supabase.auth.getUser();
