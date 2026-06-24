@@ -79,19 +79,20 @@ export default function DialectValidator() {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return;
       setUserId(u.user.id);
-      const [{ data: panel }, { data: roles }] = await Promise.all([
-        supabase.from("validator_panel_members").select("region").eq("user_id", u.user.id),
-        supabase.from("user_roles").select("role").eq("user_id", u.user.id),
-      ]);
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", u.user.id);
       const admin = (roles ?? []).some((r) => r.role === "admin");
       setIsAdmin(admin);
-      const myRegions = admin ? [...ZIM_REGION_LIST] : (panel ?? []).map((p) => p.region);
-      setRegions(myRegions);
-      // keep default "__all__" so the inbox spans every region the validator covers
+      // Open-access mode: every signed-in user can review variants across all
+      // regions. Panel membership is no longer required for testing.
+      setRegions([...ZIM_REGION_LIST]);
       const { data: us } = await supabase.from("universal_signs").select("id, gloss").order("gloss");
       setUniversalSigns((us ?? []) as { id: string; gloss: string }[]);
     })();
   }, []);
+
 
   const loadVariants = useCallback(async () => {
     if (regions.length === 0) return;
