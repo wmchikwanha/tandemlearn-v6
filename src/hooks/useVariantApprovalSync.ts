@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cacheApprovedVariant, invalidateVariantCache } from "@/utils/offlineStorage";
 
@@ -7,12 +8,20 @@ import { cacheApprovedVariant, invalidateVariantCache } from "@/utils/offlineSto
  *
  * Listens for human-driven validator approvals on `dialect_variants`.
  * When a variant transitions to `status='approved'`, the matching IndexedDB
- * entry is replaced so online devices reflect the new sign immediately.
- * Offline devices pick the update up on next sync. Triggered exclusively by
- * validator action — never by an AI loop.
+ * entry is replaced AND React Query caches are invalidated so every open
+ * client refreshes instantly. Offline devices pick the update up on next sync.
  */
 export const useVariantApprovalSync = () => {
+  const qc = useQueryClient();
+  const invalidateQueries = () => {
+    qc.invalidateQueries({ queryKey: ["dialect_variants"] });
+    qc.invalidateQueries({ queryKey: ["variants"] });
+    qc.invalidateQueries({ queryKey: ["fallback-hotspots"] });
+    qc.invalidateQueries({ queryKey: ["harmonization"] });
+  };
+
   useEffect(() => {
+
     // 1. Postgres changes channel — fires for any UPDATE on dialect_variants
     const pgChannel = supabase
       .channel("dialect_variants_approvals")
@@ -47,9 +56,11 @@ export const useVariantApprovalSync = () => {
               currentVersion: newRow.current_version,
               updatedAt: newRow.updated_at,
             });
+            invalidateQueries();
           } catch (e) {
             console.error("[variant-sync] cache write failed", e);
           }
+
         },
       )
       .on(
@@ -60,11 +71,13 @@ export const useVariantApprovalSync = () => {
           if (oldRow?.id) {
             try {
               await invalidateVariantCache(oldRow.id);
+              invalidateQueries();
             } catch (e) {
               console.error("[variant-sync] cache invalidation failed", e);
             }
           }
         },
+
       )
       .subscribe();
 
@@ -89,8 +102,10 @@ export const useVariantApprovalSync = () => {
           currentVersion: p.current_version ?? 1,
           updatedAt: p.updated_at ?? new Date().toISOString(),
         });
+        invalidateQueries();
       })
       .subscribe();
+
 
     return () => {
       supabase.removeChannel(pgChannel);

@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -48,7 +49,9 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 export default function DialectValidator() {
+  const [searchParams] = useSearchParams();
   const [userId, setUserId] = useState<string | null>(null);
+
   const [regions, setRegions] = useState<string[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [activeRegion, setActiveRegion] = useState<string>("__all__");
@@ -74,24 +77,35 @@ export default function DialectValidator() {
     return () => window.removeEventListener("validator-prefs-changed", onChange);
   }, []);
 
+  // Deep-link from Harmonization hotspot table: ?gloss=...&region=...
+  useEffect(() => {
+    const g = searchParams.get("gloss");
+    const r = searchParams.get("region");
+    if (g) setSearchQuery(g);
+    if (r) setActiveRegion(r);
+    if (g || r) setStatusFilter("all");
+  }, [searchParams]);
+
+
   useEffect(() => {
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return;
       setUserId(u.user.id);
-      const [{ data: panel }, { data: roles }] = await Promise.all([
-        supabase.from("validator_panel_members").select("region").eq("user_id", u.user.id),
-        supabase.from("user_roles").select("role").eq("user_id", u.user.id),
-      ]);
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", u.user.id);
       const admin = (roles ?? []).some((r) => r.role === "admin");
       setIsAdmin(admin);
-      const myRegions = admin ? [...ZIM_REGION_LIST] : (panel ?? []).map((p) => p.region);
-      setRegions(myRegions);
-      // keep default "__all__" so the inbox spans every region the validator covers
+      // Open-access mode: every signed-in user can review variants across all
+      // regions. Panel membership is no longer required for testing.
+      setRegions([...ZIM_REGION_LIST]);
       const { data: us } = await supabase.from("universal_signs").select("id, gloss").order("gloss");
       setUniversalSigns((us ?? []) as { id: string; gloss: string }[]);
     })();
   }, []);
+
 
   const loadVariants = useCallback(async () => {
     if (regions.length === 0) return;
@@ -193,7 +207,7 @@ export default function DialectValidator() {
       try {
         const { data: fresh } = await supabase
           .from("dialect_variants")
-          .select("id, universal_sign_id, region, variant_label, video_url, notation, current_version, updated_at")
+          .select("id, universal_sign_id, region, variant_label, video_url, notation, current_version, updated_at, submitted_by")
           .eq("id", v.id)
           .maybeSingle();
         if (fresh) {
@@ -201,11 +215,28 @@ export default function DialectValidator() {
           await ch.subscribe();
           await ch.send({ type: "broadcast", event: "variant_approved", payload: fresh });
           supabase.removeChannel(ch);
+
+          // Notify the submitter that their contribution was accepted.
+          if (fresh.submitted_by && fresh.submitted_by !== userId) {
+            await supabase.from("mhandara_alerts").insert({
+              user_id: fresh.submitted_by,
+              alert_type: "dialect_resolved",
+              title: `Your variant "${fresh.variant_label}" was approved`,
+              body: `Reviewed for ${String(fresh.region).replace(/_/g, " ")}. It is now live in the open ZSL corpus.`,
+              action_payload: {
+                link: "/dialect-bridge",
+                variant_id: fresh.id,
+                region: fresh.region,
+                gloss_id: fresh.universal_sign_id,
+              },
+            });
+          }
         }
       } catch (e) {
         console.error("[validator] broadcast emit failed", e);
       }
     }
+
 
     toast.success(`Marked ${status}.`);
     setReviewNote("");
@@ -258,20 +289,8 @@ export default function DialectValidator() {
     );
   }
 
-  if (regions.length === 0) {
-    return (
-      <div className="min-h-screen bg-background">
-        <header className="border-b bg-card"><div className="container mx-auto px-4 py-6">
-          <Link to="/dialect-bridge" className="text-sm text-muted-foreground hover:text-primary">← Dialect Bridge</Link>
-        </div></header>
-        <main className="container mx-auto px-4 py-16 max-w-xl text-center space-y-3">
-          <ShieldCheck className="h-10 w-10 mx-auto text-muted-foreground" />
-          <h1 className="text-2xl font-bold">You're not on a validator panel yet</h1>
-          <p className="text-muted-foreground">Panel seats are appointed by deaf-led regional chairs. Ask an admin to add you.</p>
-        </main>
-      </div>
-    );
-  }
+  // Open-access: no panel gate. Every signed-in user enters the console.
+
 
   return (
     <div className="min-h-screen bg-background">
