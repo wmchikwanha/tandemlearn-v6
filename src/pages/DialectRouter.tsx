@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeftRight, Send, Sparkles, Type } from "lucide-react";
+import { ArrowLeftRight, Send, Sparkles, Type, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
