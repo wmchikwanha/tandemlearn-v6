@@ -1,0 +1,1 @@
+ALTER TABLE public.dialect_variants ADD COLUMN IF NOT EXISTS media_files jsonb NOT NULL DEFAULT '[]'::jsonb;
