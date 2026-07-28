@@ -87,7 +87,29 @@ export default function DialectRouter() {
     });
   };
 
-  const removeFile = (key: string) => setMediaFiles((prev) => prev.filter((f) => fileKey(f) !== key));
+  const removeFile = (key: string) => {
+    setMediaFiles((prev) => prev.filter((f) => fileKey(f) !== key));
+    setSelectedKeys((prev) => prev.filter((k) => k !== key));
+  };
+
+  const removeSelected = () => {
+    setMediaFiles((prev) => prev.filter((f) => !selectedKeys.includes(fileKey(f))));
+    setSelectedKeys([]);
+  };
+
+  const toggleSelected = (key: string) =>
+    setSelectedKeys((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+
+  const moveFile = (index: number, dir: -1 | 1) => {
+    setMediaFiles((prev) => {
+      const target = index + dir;
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
 
   const run = async () => {
     if (!gloss.trim()) return;
