@@ -32,6 +32,7 @@ export default function DialectRouter() {
   const [submitRegion, setSubmitRegion] = useState<string>("Masvingo");
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<Record<string, string>>({});
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [fileErrors, setFileErrors] = useState<string[]>([]);
   const [progress, setProgress] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
