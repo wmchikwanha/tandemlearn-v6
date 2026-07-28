@@ -300,32 +300,74 @@ export default function DialectRouter() {
               <Label>Description of the sign</Label>
               <Textarea value={variantDesc} onChange={(e) => setVariantDesc(e.target.value)} rows={3} placeholder="Handshape, movement, location — describe in plain language." />
             </div>
-            <div className="space-y-1.5">
-              <Label>Attach evidence (optional)</Label>
-              <p className="text-xs text-muted-foreground">Audio, video, image, PDF, Word, .txt or .md — max 50 MB.</p>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="file"
-                  accept={ACCEPTED_TYPES}
-                  onChange={(e) => setMediaFile(e.target.files?.[0] ?? null)}
-                  className="cursor-pointer"
-                />
-                {mediaFile && (
-                  <Button type="button" variant="ghost" size="icon" onClick={() => setMediaFile(null)} aria-label="Remove file">
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-              {mediaFile && (
-                <div className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Upload className="h-3 w-3" />
-                  {mediaFile.name} · {(mediaFile.size / 1024 / 1024).toFixed(2)} MB · {classifyMedia(mediaFile)}
+            <div className="space-y-2">
+              <Label>Attach evidence (optional, multiple files)</Label>
+              <p className="text-xs text-muted-foreground">Audio, video, image, PDF, Word, .txt or .md — max 50 MB each.</p>
+              <Input
+                type="file"
+                multiple
+                accept={ACCEPTED_TYPES}
+                onChange={(e) => { addFiles(e.target.files); e.currentTarget.value = ""; }}
+                className="cursor-pointer"
+              />
+
+              {fileErrors.length > 0 && (
+                <div className="rounded-md border border-destructive/40 bg-destructive/10 p-2 space-y-1">
+                  {fileErrors.map((err) => (
+                    <p key={err} className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3 shrink-0" /> {err}
+                    </p>
+                  ))}
+                </div>
+              )}
+
+              {mediaFiles.length > 0 && (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {mediaFiles.map((f) => {
+                    const key = fileKey(f);
+                    const kind = classifyMedia(f);
+                    const url = previews[key];
+                    return (
+                      <div key={key} className="border rounded-md p-2 space-y-2 bg-muted/20">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="text-xs text-muted-foreground flex items-center gap-1 min-w-0">
+                            <Upload className="h-3 w-3 shrink-0" />
+                            <span className="truncate">{f.name}</span>
+                          </div>
+                          <Button type="button" variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => removeFile(key)} aria-label={`Remove ${f.name}`}>
+                            <X className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                        <div className="text-[11px] text-muted-foreground">
+                          {(f.size / 1024 / 1024).toFixed(2)} MB · {kind}
+                        </div>
+                        {kind === "image" && url && (
+                          <img src={url} alt={`Preview of ${f.name}`} className="w-full h-32 object-contain rounded bg-background" />
+                        )}
+                        {kind === "audio" && url && <audio src={url} controls className="w-full" />}
+                        {kind === "video" && url && <video src={url} controls className="w-full h-32 rounded bg-background" />}
+                        {kind === "pdf" && url && (
+                          <object data={url} type="application/pdf" className="w-full h-40 rounded border">
+                            <a href={url} target="_blank" rel="noreferrer" className="text-xs text-primary underline">Open PDF preview</a>
+                          </object>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {progress !== null && (
+                <div className="space-y-1">
+                  <Progress value={progress} />
+                  <p className="text-xs text-muted-foreground">Uploading evidence… {progress}%</p>
                 </div>
               )}
             </div>
-            <Button onClick={submitVariant} disabled={submitting} className="gap-2">
-              <Send className="h-4 w-4" /> {submitting ? "Submitting…" : "Submit for panel review"}
+            <Button onClick={submitVariant} disabled={!canSubmit} className="gap-2">
+              <Send className="h-4 w-4" /> {progress !== null ? `Uploading… ${progress}%` : submitting ? "Saving…" : "Submit for panel review"}
             </Button>
+
           </CardContent>
         </Card>
       </main>
