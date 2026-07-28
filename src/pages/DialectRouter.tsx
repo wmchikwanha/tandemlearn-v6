@@ -29,21 +29,64 @@ export default function DialectRouter() {
   const [variantDesc, setVariantDesc] = useState("");
   const [notation, setNotation] = useState("");
   const [submitRegion, setSubmitRegion] = useState<string>("Masvingo");
-  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<Record<string, string>>({});
+  const [fileErrors, setFileErrors] = useState<string[]>([]);
+  const [progress, setProgress] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const ACCEPTED_TYPES = "audio/*,video/*,image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown,.md";
   const MAX_BYTES = 50 * 1024 * 1024; // 50 MB
 
-  const classifyMedia = (file: File): string => {
+  const classifyMedia = (file: File): string | null => {
     if (file.type.startsWith("audio/")) return "audio";
     if (file.type.startsWith("video/")) return "video";
     if (file.type.startsWith("image/")) return "image";
     if (file.type === "application/pdf") return "pdf";
-    if (file.type.includes("word") || file.name.match(/\.docx?$/i)) return "word";
-    if (file.type === "text/markdown" || file.name.match(/\.md$/i)) return "markdown";
-    return "text";
+    if (file.type.includes("word") || /\.docx?$/i.test(file.name)) return "word";
+    if (file.type === "text/markdown" || /\.md$/i.test(file.name)) return "markdown";
+    if (file.type === "text/plain" || /\.txt$/i.test(file.name)) return "text";
+    return null;
   };
+
+  const fileKey = (f: File) => `${f.name}_${f.size}_${f.lastModified}`;
+
+  useEffect(() => {
+    const urls: Record<string, string> = {};
+    mediaFiles.forEach((f) => {
+      const kind = classifyMedia(f);
+      if (kind === "image" || kind === "audio" || kind === "pdf" || kind === "video") {
+        urls[fileKey(f)] = URL.createObjectURL(f);
+      }
+    });
+    setPreviews(urls);
+    return () => Object.values(urls).forEach((u) => URL.revokeObjectURL(u));
+  }, [mediaFiles]);
+
+  const addFiles = (list: FileList | null) => {
+    if (!list) return;
+    const errors: string[] = [];
+    const accepted: File[] = [];
+    Array.from(list).forEach((f) => {
+      const kind = classifyMedia(f);
+      if (!kind) {
+        errors.push(`${f.name}: unsupported file type. Allowed: audio, video, image, PDF, Word, .txt, .md.`);
+        return;
+      }
+      if (f.size > MAX_BYTES) {
+        errors.push(`${f.name}: exceeds the 50 MB limit.`);
+        return;
+      }
+      accepted.push(f);
+    });
+    setFileErrors(errors);
+    setMediaFiles((prev) => {
+      const seen = new Set(prev.map(fileKey));
+      return [...prev, ...accepted.filter((f) => !seen.has(fileKey(f)))];
+    });
+  };
+
+  const removeFile = (key: string) => setMediaFiles((prev) => prev.filter((f) => fileKey(f) !== key));
 
   const run = async () => {
     if (!gloss.trim()) return;
@@ -54,6 +97,13 @@ export default function DialectRouter() {
   };
 
   useEffect(() => { run(); /* eslint-disable-next-line */ }, []);
+
+  const canSubmit =
+    !submitting &&
+    progress === null &&
+    variantLabel.trim().length > 0 &&
+    variantDesc.trim().length > 0 &&
+    fileErrors.length === 0;
 
   const submitVariant = async () => {
     if (!variantLabel.trim() || !variantDesc.trim()) {
@@ -79,29 +129,30 @@ export default function DialectRouter() {
       return;
     }
 
-    let mediaUrl: string | null = null;
-    let mediaType: string | null = null;
-    if (mediaFile) {
-      if (mediaFile.size > MAX_BYTES) {
-        toast.error("File exceeds 50 MB.");
-        setSubmitting(false);
-        return;
+    const uploaded: Array<{ url: string; type: string; name: string; size: number }> = [];
+    if (mediaFiles.length > 0) {
+      setProgress(0);
+      for (let i = 0; i < mediaFiles.length; i++) {
+        const file = mediaFiles[i];
+        const kind = classifyMedia(file);
+        if (!kind) continue;
+        const safeName = file.name.replace(/[^\w.\-]+/g, "_");
+        const path = `${user.id}/${Date.now()}_${i}_${safeName}`;
+        const { error: upErr } = await supabase.storage
+          .from("dialect-variant-media")
+          .upload(path, file, { contentType: file.type || undefined, upsert: false });
+        if (upErr) {
+          toast.error(`Upload failed for ${file.name}: ${upErr.message}`);
+          setSubmitting(false);
+          setProgress(null);
+          return;
+        }
+        const { data: signed } = await supabase.storage
+          .from("dialect-variant-media")
+          .createSignedUrl(path, 60 * 60 * 24 * 365);
+        uploaded.push({ url: signed?.signedUrl ?? path, type: kind, name: file.name, size: file.size });
+        setProgress(Math.round(((i + 1) / mediaFiles.length) * 100));
       }
-      const safeName = mediaFile.name.replace(/[^\w.\-]+/g, "_");
-      const path = `${user.id}/${Date.now()}_${safeName}`;
-      const { error: upErr } = await supabase.storage
-        .from("dialect-variant-media")
-        .upload(path, mediaFile, { contentType: mediaFile.type || undefined, upsert: false });
-      if (upErr) {
-        toast.error(`Upload failed: ${upErr.message}`);
-        setSubmitting(false);
-        return;
-      }
-      const { data: signed } = await supabase.storage
-        .from("dialect-variant-media")
-        .createSignedUrl(path, 60 * 60 * 24 * 365);
-      mediaUrl = signed?.signedUrl ?? path;
-      mediaType = classifyMedia(mediaFile);
     }
 
     const { error } = await supabase.from("dialect_variants").insert({
@@ -110,20 +161,23 @@ export default function DialectRouter() {
       variant_label: variantLabel.trim(),
       description: variantDesc.trim(),
       notation: notation.trim() || null,
-      media_url: mediaUrl,
-      media_type: mediaType,
+      media_url: uploaded[0]?.url ?? null,
+      media_type: uploaded[0]?.type ?? null,
+      media_files: uploaded,
       submitted_by: user.id,
       status: "pending",
     } as never);
     setSubmitting(false);
+    setProgress(null);
     if (error) {
       toast.error(error.message);
       return;
     }
     toast.success("Submitted to the regional validator panel.");
-    setVariantLabel(""); setVariantDesc(""); setNotation(""); setMediaFile(null);
+    setVariantLabel(""); setVariantDesc(""); setNotation(""); setMediaFiles([]); setFileErrors([]);
     run();
   };
+
 
   return (
     <div className="min-h-screen bg-background">
