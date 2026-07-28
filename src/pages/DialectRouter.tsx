@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { AlertCircle, ArrowLeftRight, Send, Sparkles, Type, Upload, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { AlertCircle, ArrowDown, ArrowLeftRight, ArrowUp, Send, Sparkles, Trash2, Type, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +33,7 @@ export default function DialectRouter() {
   const [submitRegion, setSubmitRegion] = useState<string>("Masvingo");
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<Record<string, string>>({});
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [fileErrors, setFileErrors] = useState<string[]>([]);
   const [progress, setProgress] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -87,7 +89,29 @@ export default function DialectRouter() {
     });
   };
 
-  const removeFile = (key: string) => setMediaFiles((prev) => prev.filter((f) => fileKey(f) !== key));
+  const removeFile = (key: string) => {
+    setMediaFiles((prev) => prev.filter((f) => fileKey(f) !== key));
+    setSelectedKeys((prev) => prev.filter((k) => k !== key));
+  };
+
+  const removeSelected = () => {
+    setMediaFiles((prev) => prev.filter((f) => !selectedKeys.includes(fileKey(f))));
+    setSelectedKeys([]);
+  };
+
+  const toggleSelected = (key: string) =>
+    setSelectedKeys((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+
+  const moveFile = (index: number, dir: -1 | 1) => {
+    setMediaFiles((prev) => {
+      const target = index + dir;
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
 
   const run = async () => {
     if (!gloss.trim()) return;
@@ -323,40 +347,96 @@ export default function DialectRouter() {
               )}
 
               {mediaFiles.length > 0 && (
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {mediaFiles.map((f) => {
-                    const key = fileKey(f);
-                    const kind = classifyMedia(f);
-                    const url = previews[key];
-                    return (
-                      <div key={key} className="border rounded-md p-2 space-y-2 bg-muted/20">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="text-xs text-muted-foreground flex items-center gap-1 min-w-0">
-                            <Upload className="h-3 w-3 shrink-0" />
-                            <span className="truncate">{f.name}</span>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <p className="text-xs text-muted-foreground">
+                      {mediaFiles.length} file{mediaFiles.length > 1 ? "s" : ""} attached · order below is the order stored with the submission
+                    </p>
+                    <div className="flex items-center gap-2">
+                      {selectedKeys.length > 0 && (
+                        <Button type="button" variant="destructive" size="sm" className="h-7 gap-1" onClick={removeSelected}>
+                          <Trash2 className="h-3.5 w-3.5" /> Remove {selectedKeys.length} selected
+                        </Button>
+                      )}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-7"
+                        onClick={() =>
+                          setSelectedKeys(selectedKeys.length === mediaFiles.length ? [] : mediaFiles.map(fileKey))
+                        }
+                      >
+                        {selectedKeys.length === mediaFiles.length ? "Clear selection" : "Select all"}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {mediaFiles.map((f, i) => {
+                      const key = fileKey(f);
+                      const kind = classifyMedia(f);
+                      const url = previews[key];
+                      const selected = selectedKeys.includes(key);
+                      return (
+                        <div
+                          key={key}
+                          className={`border rounded-md p-2 space-y-2 bg-muted/20 ${selected ? "border-primary ring-1 ring-primary/40" : ""}`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-start gap-2 min-w-0">
+                              <Checkbox
+                                checked={selected}
+                                onCheckedChange={() => toggleSelected(key)}
+                                aria-label={`Select ${f.name}`}
+                                className="mt-0.5"
+                              />
+                              <div className="text-xs text-muted-foreground flex items-center gap-1 min-w-0">
+                                <span className="font-semibold text-foreground">{i + 1}.</span>
+                                <span className="truncate">{f.name}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center shrink-0">
+                              <Button type="button" variant="ghost" size="icon" className="h-6 w-6" disabled={i === 0} onClick={() => moveFile(i, -1)} aria-label={`Move ${f.name} earlier`}>
+                                <ArrowUp className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button type="button" variant="ghost" size="icon" className="h-6 w-6" disabled={i === mediaFiles.length - 1} onClick={() => moveFile(i, 1)} aria-label={`Move ${f.name} later`}>
+                                <ArrowDown className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(key)} aria-label={`Remove ${f.name}`}>
+                                <X className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
                           </div>
-                          <Button type="button" variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => removeFile(key)} aria-label={`Remove ${f.name}`}>
-                            <X className="h-3.5 w-3.5" />
-                          </Button>
+                          <div className="text-[11px] text-muted-foreground flex items-center gap-1">
+                            <Upload className="h-3 w-3" />
+                            {(f.size / 1024 / 1024).toFixed(2)} MB · {kind}
+                          </div>
+                          {kind === "image" && url && (
+                            <img src={url} alt={`Preview of ${f.name}`} className="w-full h-32 object-contain rounded bg-background" />
+                          )}
+                          {kind === "audio" && url && <audio src={url} controls className="w-full" />}
+                          {kind === "video" && url && (
+                            <video
+                              src={url}
+                              controls
+                              playsInline
+                              preload="metadata"
+                              className="w-full h-44 rounded bg-black object-contain"
+                            />
+                          )}
+                          {kind === "pdf" && url && (
+                            <object data={url} type="application/pdf" className="w-full h-40 rounded border">
+                              <a href={url} target="_blank" rel="noreferrer" className="text-xs text-primary underline">Open PDF preview</a>
+                            </object>
+                          )}
                         </div>
-                        <div className="text-[11px] text-muted-foreground">
-                          {(f.size / 1024 / 1024).toFixed(2)} MB · {kind}
-                        </div>
-                        {kind === "image" && url && (
-                          <img src={url} alt={`Preview of ${f.name}`} className="w-full h-32 object-contain rounded bg-background" />
-                        )}
-                        {kind === "audio" && url && <audio src={url} controls className="w-full" />}
-                        {kind === "video" && url && <video src={url} controls className="w-full h-32 rounded bg-background" />}
-                        {kind === "pdf" && url && (
-                          <object data={url} type="application/pdf" className="w-full h-40 rounded border">
-                            <a href={url} target="_blank" rel="noreferrer" className="text-xs text-primary underline">Open PDF preview</a>
-                          </object>
-                        )}
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               )}
+
 
               {progress !== null && (
                 <div className="space-y-1">
