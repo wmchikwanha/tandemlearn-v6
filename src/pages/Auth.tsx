@@ -871,6 +871,12 @@ const Auth = () => {
           ) : (
             // Regular auth flow
             <Tabs defaultValue="signin" className="w-full">
+              <div className="mb-4 rounded-md border border-primary/30 bg-primary/5 p-3 text-xs text-muted-foreground">
+                <span className="font-semibold text-primary">Privacy note: </span>
+                You can use temporary email addresses, e.g. test@mail.com, for instant testing with no
+                verification steps required. Just note that different account types require separate
+                email addresses.
+              </div>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
