@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeftRight, Send, Sparkles, Type, Upload, X } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { AlertCircle, ArrowLeftRight, Send, Sparkles, Type, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,21 +30,64 @@ export default function DialectRouter() {
   const [variantDesc, setVariantDesc] = useState("");
   const [notation, setNotation] = useState("");
   const [submitRegion, setSubmitRegion] = useState<string>("Masvingo");
-  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<Record<string, string>>({});
+  const [fileErrors, setFileErrors] = useState<string[]>([]);
+  const [progress, setProgress] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const ACCEPTED_TYPES = "audio/*,video/*,image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown,.md";
   const MAX_BYTES = 50 * 1024 * 1024; // 50 MB
 
-  const classifyMedia = (file: File): string => {
+  const classifyMedia = (file: File): string | null => {
     if (file.type.startsWith("audio/")) return "audio";
     if (file.type.startsWith("video/")) return "video";
     if (file.type.startsWith("image/")) return "image";
     if (file.type === "application/pdf") return "pdf";
-    if (file.type.includes("word") || file.name.match(/\.docx?$/i)) return "word";
-    if (file.type === "text/markdown" || file.name.match(/\.md$/i)) return "markdown";
-    return "text";
+    if (file.type.includes("word") || /\.docx?$/i.test(file.name)) return "word";
+    if (file.type === "text/markdown" || /\.md$/i.test(file.name)) return "markdown";
+    if (file.type === "text/plain" || /\.txt$/i.test(file.name)) return "text";
+    return null;
   };
+
+  const fileKey = (f: File) => `${f.name}_${f.size}_${f.lastModified}`;
+
+  useEffect(() => {
+    const urls: Record<string, string> = {};
+    mediaFiles.forEach((f) => {
+      const kind = classifyMedia(f);
+      if (kind === "image" || kind === "audio" || kind === "pdf" || kind === "video") {
+        urls[fileKey(f)] = URL.createObjectURL(f);
+      }
+    });
+    setPreviews(urls);
+    return () => Object.values(urls).forEach((u) => URL.revokeObjectURL(u));
+  }, [mediaFiles]);
+
+  const addFiles = (list: FileList | null) => {
+    if (!list) return;
+    const errors: string[] = [];
+    const accepted: File[] = [];
+    Array.from(list).forEach((f) => {
+      const kind = classifyMedia(f);
+      if (!kind) {
+        errors.push(`${f.name}: unsupported file type. Allowed: audio, video, image, PDF, Word, .txt, .md.`);
+        return;
+      }
+      if (f.size > MAX_BYTES) {
+        errors.push(`${f.name}: exceeds the 50 MB limit.`);
+        return;
+      }
+      accepted.push(f);
+    });
+    setFileErrors(errors);
+    setMediaFiles((prev) => {
+      const seen = new Set(prev.map(fileKey));
+      return [...prev, ...accepted.filter((f) => !seen.has(fileKey(f)))];
+    });
+  };
+
+  const removeFile = (key: string) => setMediaFiles((prev) => prev.filter((f) => fileKey(f) !== key));
 
   const run = async () => {
     if (!gloss.trim()) return;
@@ -54,6 +98,13 @@ export default function DialectRouter() {
   };
 
   useEffect(() => { run(); /* eslint-disable-next-line */ }, []);
+
+  const canSubmit =
+    !submitting &&
+    progress === null &&
+    variantLabel.trim().length > 0 &&
+    variantDesc.trim().length > 0 &&
+    fileErrors.length === 0;
 
   const submitVariant = async () => {
     if (!variantLabel.trim() || !variantDesc.trim()) {
@@ -79,29 +130,30 @@ export default function DialectRouter() {
       return;
     }
 
-    let mediaUrl: string | null = null;
-    let mediaType: string | null = null;
-    if (mediaFile) {
-      if (mediaFile.size > MAX_BYTES) {
-        toast.error("File exceeds 50 MB.");
-        setSubmitting(false);
-        return;
+    const uploaded: Array<{ url: string; type: string; name: string; size: number }> = [];
+    if (mediaFiles.length > 0) {
+      setProgress(0);
+      for (let i = 0; i < mediaFiles.length; i++) {
+        const file = mediaFiles[i];
+        const kind = classifyMedia(file);
+        if (!kind) continue;
+        const safeName = file.name.replace(/[^\w.\-]+/g, "_");
+        const path = `${user.id}/${Date.now()}_${i}_${safeName}`;
+        const { error: upErr } = await supabase.storage
+          .from("dialect-variant-media")
+          .upload(path, file, { contentType: file.type || undefined, upsert: false });
+        if (upErr) {
+          toast.error(`Upload failed for ${file.name}: ${upErr.message}`);
+          setSubmitting(false);
+          setProgress(null);
+          return;
+        }
+        const { data: signed } = await supabase.storage
+          .from("dialect-variant-media")
+          .createSignedUrl(path, 60 * 60 * 24 * 365);
+        uploaded.push({ url: signed?.signedUrl ?? path, type: kind, name: file.name, size: file.size });
+        setProgress(Math.round(((i + 1) / mediaFiles.length) * 100));
       }
-      const safeName = mediaFile.name.replace(/[^\w.\-]+/g, "_");
-      const path = `${user.id}/${Date.now()}_${safeName}`;
-      const { error: upErr } = await supabase.storage
-        .from("dialect-variant-media")
-        .upload(path, mediaFile, { contentType: mediaFile.type || undefined, upsert: false });
-      if (upErr) {
-        toast.error(`Upload failed: ${upErr.message}`);
-        setSubmitting(false);
-        return;
-      }
-      const { data: signed } = await supabase.storage
-        .from("dialect-variant-media")
-        .createSignedUrl(path, 60 * 60 * 24 * 365);
-      mediaUrl = signed?.signedUrl ?? path;
-      mediaType = classifyMedia(mediaFile);
     }
 
     const { error } = await supabase.from("dialect_variants").insert({
@@ -110,20 +162,23 @@ export default function DialectRouter() {
       variant_label: variantLabel.trim(),
       description: variantDesc.trim(),
       notation: notation.trim() || null,
-      media_url: mediaUrl,
-      media_type: mediaType,
+      media_url: uploaded[0]?.url ?? null,
+      media_type: uploaded[0]?.type ?? null,
+      media_files: uploaded,
       submitted_by: user.id,
       status: "pending",
     } as never);
     setSubmitting(false);
+    setProgress(null);
     if (error) {
       toast.error(error.message);
       return;
     }
     toast.success("Submitted to the regional validator panel.");
-    setVariantLabel(""); setVariantDesc(""); setNotation(""); setMediaFile(null);
+    setVariantLabel(""); setVariantDesc(""); setNotation(""); setMediaFiles([]); setFileErrors([]);
     run();
   };
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -246,32 +301,74 @@ export default function DialectRouter() {
               <Label>Description of the sign</Label>
               <Textarea value={variantDesc} onChange={(e) => setVariantDesc(e.target.value)} rows={3} placeholder="Handshape, movement, location — describe in plain language." />
             </div>
-            <div className="space-y-1.5">
-              <Label>Attach evidence (optional)</Label>
-              <p className="text-xs text-muted-foreground">Audio, video, image, PDF, Word, .txt or .md — max 50 MB.</p>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="file"
-                  accept={ACCEPTED_TYPES}
-                  onChange={(e) => setMediaFile(e.target.files?.[0] ?? null)}
-                  className="cursor-pointer"
-                />
-                {mediaFile && (
-                  <Button type="button" variant="ghost" size="icon" onClick={() => setMediaFile(null)} aria-label="Remove file">
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-              {mediaFile && (
-                <div className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Upload className="h-3 w-3" />
-                  {mediaFile.name} · {(mediaFile.size / 1024 / 1024).toFixed(2)} MB · {classifyMedia(mediaFile)}
+            <div className="space-y-2">
+              <Label>Attach evidence (optional, multiple files)</Label>
+              <p className="text-xs text-muted-foreground">Audio, video, image, PDF, Word, .txt or .md — max 50 MB each.</p>
+              <Input
+                type="file"
+                multiple
+                accept={ACCEPTED_TYPES}
+                onChange={(e) => { addFiles(e.target.files); e.currentTarget.value = ""; }}
+                className="cursor-pointer"
+              />
+
+              {fileErrors.length > 0 && (
+                <div className="rounded-md border border-destructive/40 bg-destructive/10 p-2 space-y-1">
+                  {fileErrors.map((err) => (
+                    <p key={err} className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3 shrink-0" /> {err}
+                    </p>
+                  ))}
+                </div>
+              )}
+
+              {mediaFiles.length > 0 && (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {mediaFiles.map((f) => {
+                    const key = fileKey(f);
+                    const kind = classifyMedia(f);
+                    const url = previews[key];
+                    return (
+                      <div key={key} className="border rounded-md p-2 space-y-2 bg-muted/20">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="text-xs text-muted-foreground flex items-center gap-1 min-w-0">
+                            <Upload className="h-3 w-3 shrink-0" />
+                            <span className="truncate">{f.name}</span>
+                          </div>
+                          <Button type="button" variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => removeFile(key)} aria-label={`Remove ${f.name}`}>
+                            <X className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                        <div className="text-[11px] text-muted-foreground">
+                          {(f.size / 1024 / 1024).toFixed(2)} MB · {kind}
+                        </div>
+                        {kind === "image" && url && (
+                          <img src={url} alt={`Preview of ${f.name}`} className="w-full h-32 object-contain rounded bg-background" />
+                        )}
+                        {kind === "audio" && url && <audio src={url} controls className="w-full" />}
+                        {kind === "video" && url && <video src={url} controls className="w-full h-32 rounded bg-background" />}
+                        {kind === "pdf" && url && (
+                          <object data={url} type="application/pdf" className="w-full h-40 rounded border">
+                            <a href={url} target="_blank" rel="noreferrer" className="text-xs text-primary underline">Open PDF preview</a>
+                          </object>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {progress !== null && (
+                <div className="space-y-1">
+                  <Progress value={progress} />
+                  <p className="text-xs text-muted-foreground">Uploading evidence… {progress}%</p>
                 </div>
               )}
             </div>
-            <Button onClick={submitVariant} disabled={submitting} className="gap-2">
-              <Send className="h-4 w-4" /> {submitting ? "Submitting…" : "Submit for panel review"}
+            <Button onClick={submitVariant} disabled={!canSubmit} className="gap-2">
+              <Send className="h-4 w-4" /> {progress !== null ? `Uploading… ${progress}%` : submitting ? "Saving…" : "Submit for panel review"}
             </Button>
+
           </CardContent>
         </Card>
       </main>

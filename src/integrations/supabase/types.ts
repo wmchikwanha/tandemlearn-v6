@@ -254,6 +254,7 @@ export type Database = {
           current_version: number
           description: string | null
           id: string
+          media_files: Json
           media_type: string | null
           media_url: string | null
           notation: string | null
@@ -271,6 +272,7 @@ export type Database = {
           current_version?: number
           description?: string | null
           id?: string
+          media_files?: Json
           media_type?: string | null
           media_url?: string | null
           notation?: string | null
@@ -288,6 +290,7 @@ export type Database = {
           current_version?: number
           description?: string | null
           id?: string
+          media_files?: Json
           media_type?: string | null
           media_url?: string | null
           notation?: string | null
