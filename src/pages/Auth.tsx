@@ -227,6 +227,59 @@ const Auth = () => {
     return null;
   };
 
+  // Instant, no-verification test access. Creates a throwaway account and
+  // drops the user straight into the chosen role.
+  const quickStart = async (role: "teacher" | "student") => {
+    setLoading(true);
+    try {
+      const suffix = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+      const testEmail = `test.${role}.${suffix}@mail.com`;
+      const testPassword = `Tandem-${suffix}`;
+
+      const { data, error } = await supabase.auth.signUp({
+        email: testEmail,
+        password: testPassword,
+        options: {
+          emailRedirectTo: `${window.location.origin}/role-selection`,
+          data: { full_name: role === "teacher" ? "Test Teacher" : "Test Learner" },
+        },
+      });
+      if (error) throw error;
+
+      if (!data.session) {
+        await supabase.auth.signInWithPassword({ email: testEmail, password: testPassword });
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Could not start a test session");
+
+      await supabase.from("profiles").upsert({
+        id: user.id,
+        email: testEmail,
+        full_name: role === "teacher" ? "Test Teacher" : "Test Learner",
+      });
+
+      const { error: roleError } = await supabase.rpc("switch_my_role", { _role: role });
+      if (roleError) throw roleError;
+
+      toast({
+        title: "Instant test account ready",
+        description: `Signed in as a ${role === "teacher" ? "teacher" : "learner"}. You can switch roles anytime from your profile menu.`,
+      });
+
+      navigate(role === "teacher" ? "/teacher" : "/student/timetable");
+    } catch (error: any) {
+      toast({
+        title: "Could not start test session",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
