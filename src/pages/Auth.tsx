@@ -924,6 +924,22 @@ const Auth = () => {
           ) : (
             // Regular auth flow
             <Tabs defaultValue="signin" className="w-full">
+              <div className="mb-4 rounded-md border border-secondary/40 bg-secondary/5 p-3 space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-semibold text-secondary-foreground">Instant testing: </span>
+                  No email, no password, no verification. Pick a role to jump straight in — you can
+                  switch between teacher and learner anytime from your profile menu.
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button type="button" variant="outline" disabled={loading} onClick={() => quickStart("teacher")}>
+                    Try as Teacher
+                  </Button>
+                  <Button type="button" variant="outline" disabled={loading} onClick={() => quickStart("student")}>
+                    Try as Learner
+                  </Button>
+                </div>
+              </div>
+
               <div className="mb-4 rounded-md border border-primary/30 bg-primary/5 p-3 text-xs text-muted-foreground">
                 <span className="font-semibold text-primary">Privacy note: </span>
                 You can use temporary email addresses, e.g. test@mail.com, for instant testing with no
