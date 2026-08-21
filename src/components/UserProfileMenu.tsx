@@ -60,20 +60,26 @@ export const UserProfileMenu = ({ userName, userRole }: UserProfileMenuProps) =>
     })();
   }, [userRole]);
 
-  const switchRole = async () => {
-    const target = activeRole === 'teacher' ? 'student' : 'teacher';
+  const roleHome: Record<string, string> = {
+    teacher: '/teacher',
+    student: '/student/timetable',
+    admin: '/admin',
+  };
+
+  const switchRole = async (target: 'teacher' | 'student' | 'admin') => {
     setSwitching(true);
     try {
       const { data, error } = await supabase.rpc('switch_my_role', { _role: target });
       if (error) throw error;
       setActiveRole(data as string);
-      navigate(data === 'teacher' ? '/teacher' : '/student/timetable');
+      navigate(roleHome[data as string] ?? '/student/timetable');
     } catch (e) {
       console.error('Role switch failed', e);
     } finally {
       setSwitching(false);
     }
   };
+
 
 
   const loadUserProfile = async () => {
