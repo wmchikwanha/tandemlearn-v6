@@ -1378,6 +1378,10 @@ export type Database = {
         Args: { _region: string; _user_id: string }
         Returns: boolean
       }
+      switch_my_role: {
+        Args: { _role: Database["public"]["Enums"]["app_role"] }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       validate_invitation_token: { Args: { _token: string }; Returns: Json }
     }
     Enums: {
