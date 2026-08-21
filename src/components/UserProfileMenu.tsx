@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { User, Settings, LogOut, ChevronDown, Type, Globe } from "lucide-react";
+import { User, Settings, LogOut, ChevronDown, Type, Globe, Repeat } from "lucide-react";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
