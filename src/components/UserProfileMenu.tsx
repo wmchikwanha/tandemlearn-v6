@@ -131,8 +131,8 @@ export const UserProfileMenu = ({ userName, userRole }: UserProfileMenuProps) =>
             {email && (
               <p className="text-xs text-muted-foreground">{email}</p>
             )}
-            {userRole && (
-              <p className="text-xs text-muted-foreground capitalize">{userRole}</p>
+            {(activeRole || userRole) && (
+              <p className="text-xs text-muted-foreground capitalize">{activeRole || userRole}</p>
             )}
           </div>
         </DropdownMenuLabel>
@@ -145,7 +145,19 @@ export const UserProfileMenu = ({ userName, userRole }: UserProfileMenuProps) =>
           <Settings className="mr-2 h-4 w-4" />
           {t('nav.help')}
         </DropdownMenuItem>
+        {(activeRole === 'teacher' || activeRole === 'student') && (
+          <DropdownMenuItem
+            onSelect={(e) => { e.preventDefault(); switchRole(); }}
+            disabled={switching}
+          >
+            <Repeat className="mr-2 h-4 w-4" />
+            {switching
+              ? 'Switching...'
+              : activeRole === 'teacher' ? 'Switch to Learner view' : 'Switch to Teacher view'}
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
+
         {/* Language Switcher */}
         <DropdownMenuLabel className="text-xs text-muted-foreground flex items-center gap-2">
           <Globe className="h-3 w-3" />
