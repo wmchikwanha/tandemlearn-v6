@@ -34,12 +34,47 @@ export const UserProfileMenu = ({ userName, userRole }: UserProfileMenuProps) =>
   const { t } = useLanguage();
   const [name, setName] = useState(userName || "");
   const [email, setEmail] = useState("");
+  const [activeRole, setActiveRole] = useState<string | null>(userRole ?? null);
+  const [switching, setSwitching] = useState(false);
 
   useEffect(() => {
     if (!userName) {
       loadUserProfile();
     }
   }, [userName]);
+
+  useEffect(() => {
+    if (userRole) {
+      setActiveRole(userRole);
+      return;
+    }
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (data?.role) setActiveRole(data.role);
+    })();
+  }, [userRole]);
+
+  const switchRole = async () => {
+    const target = activeRole === 'teacher' ? 'student' : 'teacher';
+    setSwitching(true);
+    try {
+      const { data, error } = await supabase.rpc('switch_my_role', { _role: target });
+      if (error) throw error;
+      setActiveRole(data as string);
+      navigate(data === 'teacher' ? '/teacher' : '/student/timetable');
+    } catch (e) {
+      console.error('Role switch failed', e);
+    } finally {
+      setSwitching(false);
+    }
+  };
+
 
   const loadUserProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser();
