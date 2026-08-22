@@ -5,7 +5,7 @@ export const QuickAccessPanel = () => {
   return (
     <nav
       aria-label="Quick access"
-      className="fixed top-4 right-4 z-50 flex items-center gap-1 rounded-2xl border-2 border-primary/20 bg-background/95 p-1.5 shadow-xl shadow-black/10 backdrop-blur-md"
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 rounded-2xl border-2 border-primary/20 bg-background/95 p-1.5 shadow-xl shadow-black/10 backdrop-blur-md"
     >
       <Link
         to="/zsl-lab"
