@@ -151,17 +151,29 @@ export const UserProfileMenu = ({ userName, userRole }: UserProfileMenuProps) =>
           <Settings className="mr-2 h-4 w-4" />
           {t('nav.help')}
         </DropdownMenuItem>
-        {(activeRole === 'teacher' || activeRole === 'student') && (
-          <DropdownMenuItem
-            onSelect={(e) => { e.preventDefault(); switchRole(); }}
-            disabled={switching}
-          >
-            <Repeat className="mr-2 h-4 w-4" />
-            {switching
-              ? 'Switching...'
-              : activeRole === 'teacher' ? 'Switch to Learner view' : 'Switch to Teacher view'}
-          </DropdownMenuItem>
-        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-xs text-muted-foreground flex items-center gap-2">
+          <Repeat className="h-3 w-3" />
+          Switch view
+        </DropdownMenuLabel>
+        {(['teacher', 'student', 'admin'] as const)
+          .filter((r) => r !== activeRole)
+          .map((r) => (
+            <DropdownMenuItem
+              key={r}
+              onSelect={(e) => { e.preventDefault(); switchRole(r); }}
+              disabled={switching}
+            >
+              <Repeat className="mr-2 h-4 w-4" />
+              {switching
+                ? 'Switching...'
+                : r === 'teacher'
+                  ? 'Teacher view'
+                  : r === 'student'
+                    ? 'Learner view'
+                    : 'Administrator view'}
+            </DropdownMenuItem>
+          ))}
         <DropdownMenuSeparator />
 
         {/* Language Switcher */}
