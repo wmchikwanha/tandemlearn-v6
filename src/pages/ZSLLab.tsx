@@ -80,7 +80,7 @@ export default function ZSLLab() {
             <li className="flex items-center gap-2"><ExternalLink className="h-3 w-3" /> Deaf Zimbabwe Trust — ZSL community leadership</li>
             <li className="flex items-center gap-2"><ExternalLink className="h-3 w-3" /> Wits Centre for Deaf Studies — SASL dictionary</li>
             <li className="flex items-center gap-2"><ExternalLink className="h-3 w-3" /> Kenya National Association of the Deaf — KSL Online</li>
-            <li className="flex items-center gap-2"><ExternalLink className="h-3 w-3" /> Signvrse (Nairobi) — kindred African effort</li>
+            <li className="flex items-center gap-2"><ExternalLink className="h-3 w-3" /> Signvrse (Nairobi)</li>
           </ul>
           <p className="mt-4 text-xs italic">
             ZSL Lab is explicitly not ASL. We credit and follow African deaf-led organisations,
