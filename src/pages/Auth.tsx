@@ -229,7 +229,7 @@ const Auth = () => {
 
   // Instant, no-verification test access. Creates a throwaway account and
   // drops the user straight into the chosen role.
-  const quickStart = async (role: "teacher" | "student") => {
+  const quickStart = async (role: "teacher" | "student" | "admin") => {
     setLoading(true);
     try {
       const suffix = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
@@ -241,7 +241,7 @@ const Auth = () => {
         password: testPassword,
         options: {
           emailRedirectTo: `${window.location.origin}/role-selection`,
-          data: { full_name: role === "teacher" ? "Test Teacher" : "Test Learner" },
+          data: { full_name: role === "teacher" ? "Test Teacher" : role === "admin" ? "Test Administrator" : "Test Learner" },
         },
       });
       if (error) throw error;
@@ -256,7 +256,7 @@ const Auth = () => {
       await supabase.from("profiles").upsert({
         id: user.id,
         email: testEmail,
-        full_name: role === "teacher" ? "Test Teacher" : "Test Learner",
+        full_name: role === "teacher" ? "Test Teacher" : role === "admin" ? "Test Administrator" : "Test Learner",
       });
 
       const { error: roleError } = await supabase.rpc("switch_my_role", { _role: role });
@@ -264,10 +264,10 @@ const Auth = () => {
 
       toast({
         title: "Instant test account ready",
-        description: `Signed in as a ${role === "teacher" ? "teacher" : "learner"}. You can switch roles anytime from your profile menu.`,
+        description: `Signed in as ${role === "teacher" ? "a teacher" : role === "admin" ? "an administrator" : "a learner"}. You can switch roles anytime from your profile menu.`,
       });
 
-      navigate(role === "teacher" ? "/teacher" : "/student/timetable");
+      navigate(role === "teacher" ? "/teacher" : role === "admin" ? "/admin" : "/student/timetable");
     } catch (error: any) {
       toast({
         title: "Could not start test session",
@@ -928,14 +928,17 @@ const Auth = () => {
                 <p className="text-xs text-muted-foreground">
                   <span className="font-semibold text-secondary-foreground">Instant testing: </span>
                   No email, no password, no verification. Pick a role to jump straight in — you can
-                  switch between teacher and learner anytime from your profile menu.
+                  switch between teacher, learner and administrator anytime from your profile menu.
                 </p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <Button type="button" variant="outline" disabled={loading} onClick={() => quickStart("teacher")}>
                     Try as Teacher
                   </Button>
                   <Button type="button" variant="outline" disabled={loading} onClick={() => quickStart("student")}>
                     Try as Learner
+                  </Button>
+                  <Button type="button" variant="outline" disabled={loading} onClick={() => quickStart("admin")}>
+                    Try as Admin
                   </Button>
                 </div>
               </div>
