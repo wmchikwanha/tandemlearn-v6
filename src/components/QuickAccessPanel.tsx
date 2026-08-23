@@ -5,20 +5,20 @@ export const QuickAccessPanel = () => {
   return (
     <nav
       aria-label="Quick access"
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 rounded-2xl border-2 border-primary/20 bg-background/95 p-1.5 shadow-xl shadow-black/10 backdrop-blur-md"
+      className="fixed top-3 left-3 z-50 flex items-center gap-1 rounded-xl border border-primary/20 bg-background/90 p-1 shadow-md backdrop-blur-md"
     >
       <Link
         to="/zsl-lab"
-        className="flex items-center gap-2 rounded-xl bg-primary px-3.5 py-2.5 text-sm font-bold text-primary-foreground shadow-sm transition hover:bg-primary/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 min-h-[44px]"
+        className="flex items-center gap-1.5 rounded-lg bg-primary px-2.5 py-1.5 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
       >
-        <Hand className="h-5 w-5" aria-hidden="true" />
+        <Hand className="h-4 w-4" aria-hidden="true" />
         <span className="hidden sm:inline">ZSL Lab</span>
       </Link>
       <Link
         to="/guardian"
-        className="flex items-center gap-2 rounded-xl bg-secondary px-3.5 py-2.5 text-sm font-bold text-secondary-foreground shadow-sm transition hover:bg-secondary/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 min-h-[44px]"
+        className="flex items-center gap-1.5 rounded-lg bg-secondary px-2.5 py-1.5 text-xs font-semibold text-secondary-foreground transition hover:bg-secondary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
       >
-        <Users className="h-5 w-5" aria-hidden="true" />
+        <Users className="h-4 w-4" aria-hidden="true" />
         <span className="hidden sm:inline">Parent Portal</span>
       </Link>
     </nav>
